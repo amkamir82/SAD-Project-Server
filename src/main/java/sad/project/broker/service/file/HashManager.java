@@ -1,13 +1,16 @@
 package sad.project.broker.service.file;
 
 import lombok.SneakyThrows;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+@Component
 public class HashManager {
-    private static volatile HashManager instance;
     private final MessageDigest messageDigest;
 
     private HashManager() throws NoSuchAlgorithmException {
@@ -15,15 +18,10 @@ public class HashManager {
     }
 
     @SneakyThrows
-    public static HashManager getInstance() {
-        if (instance == null) {
-            synchronized (HashManager.class) {
-                while (instance == null) {
-                    instance = new HashManager();
-                }
-            }
-        }
-        return instance;
+    @Bean
+    @Scope("singleton")
+    public static HashManager getHashManagerInstance() {
+        return new HashManager();
     }
 
     public String getMessageHash(String message) {

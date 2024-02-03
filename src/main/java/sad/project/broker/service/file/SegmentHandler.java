@@ -1,51 +1,36 @@
 package sad.project.broker.service.file;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Scope;
-import sad.project.broker.service.cordinator.BrokerManager;
+import org.json.JSONObject;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
-@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-public class SegmentHandler {
+public abstract class SegmentHandler {
+    protected Indexer indexer;
+    protected JSONObject lastSegment;
 
-    private final Indexer indexer;
-    private final BrokerManager brokerManager;
-    private JSONObject lastSegment;
+    private final int SEGMENT_SIZE = 100;
 
-    private SegmentHandler(Indexer indexer, BrokerManager brokerManager) {
+    protected SegmentHandler(Indexer indexer) {
         this.indexer = indexer;
-        this.brokerManager = brokerManager;
-        lastSegment = new JSONObject(); // todo: maybe load from file
+        this.lastSegment = loadLastSegment();
     }
 
-    @Bean
-    @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
-    public static SegmentHandler getInstance() {
-        return new SegmentHandler(Indexer.getInstance(), BrokerManager.getInstance());
-    }
 
     public synchronized boolean append(String key, byte[] value) {
+        System.err.println("here");
         long writeIndex = indexer.getWriteIndex();
-        int SEGMENT_SIZE = 10;
         int dataCounterInSegment = (int) (writeIndex % SEGMENT_SIZE);
 
         if (dataCounterInSegment == SEGMENT_SIZE - 1) {
             lastSegment = new JSONObject();
         }
 
-        long segmentNumber = (long) Math.floor((double) writeIndex / SEGMENT_SIZE) + 1;
+        long segmentNumber = getCurrentSegmentNumber();
         String segmentPath = getSegmentPath(segmentNumber);
         try {
             lastSegment.put(key, value);
@@ -55,44 +40,50 @@ public class SegmentHandler {
                 e.printStackTrace();
                 throw e;
             }
-            sendDataToReplica(key, value);
+            indexer.increaseWriteIndex();
             return true;
         } catch (Exception e) {
             lastSegment.remove(key);
+            e.printStackTrace();
             // todo: it must be logged somewhere
-            return false;
         }
+        return false;
     }
 
-    @SneakyThrows
-    private void sendDataToReplica(String key, byte[] value) {
-        String segmentReplicaUrl = brokerManager.getReplicaAddress();
-        Map<String, byte[]> data = new HashMap<>();
-        data.put("key", key.getBytes(StandardCharsets.UTF_8));
-        data.put("value", value);
-
-        URL url = new URL(segmentReplicaUrl);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonString = objectMapper.writeValueAsString(data);
-
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("POST");
-        connection.setDoOutput(true);
-        try (OutputStream outputStream = connection.getOutputStream()) {
-            outputStream.write(jsonString.getBytes(StandardCharsets.UTF_8));
+    public void removeElement(String key) throws IOException {
+        lastSegment.remove(key);
+        indexer.decreaseWriteIndex();
+        try (FileWriter fileWriter = new FileWriter(getSegmentPath(getCurrentSegmentNumber()))) {
+            fileWriter.write(lastSegment.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw e;
         }
-        int responseCode = connection.getResponseCode();
-        if (responseCode != 200) {
-            throw new Exception(""); // todo
-        }
-        connection.disconnect();
     }
 
 
     private String getSegmentPath(long segmentNumber) {
-        int brokerId = brokerManager.getBrokerId();
-        return "partition_" + brokerId + "/segment_" + segmentNumber;
+        return "partition_" + indexer.getPartition() + "/segment_" + segmentNumber;
     }
 
+    @SneakyThrows
+    private JSONObject loadLastSegment() {
+        String filePath = getSegmentPath(getCurrentSegmentNumber());
+
+        File file = new File(filePath);
+        if (!file.exists()) {
+            return new JSONObject();
+        }
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(file);
+        return new JSONObject(jsonNode.toString());
+    }
+
+    private long getCurrentSegmentNumber() {
+        long writeIndex = indexer.getWriteIndex();
+        return (long) Math.floor((double) writeIndex / SEGMENT_SIZE) + 1;
+    }
+
+    ;
 }
