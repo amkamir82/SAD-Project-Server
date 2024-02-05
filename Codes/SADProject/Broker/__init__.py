@@ -1,7 +1,7 @@
-from Codes.SADProject.Broker.file.write import Write
+from Codes.SADProject.Broker.read.read_crun import *
 
-writer = Write('3')
-writer.write_data('id1', "id".encode())
-writer.write_data('id1', "hi".encode())
-writer = Write('2')
-writer.write_data('id', "koft".encode())
+schedule_read()
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)

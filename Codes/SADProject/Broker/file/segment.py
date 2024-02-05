@@ -36,6 +36,27 @@ class Segment(object):
 
             self.indexer.inc_write()
 
+    def read(self):
+        read_index = self.indexer.get_read()
+        segment_path = self.read_segment_path()
+
+        data_file_path = os.path.join(segment_path, f'{read_index}.dat')
+
+        if os.path.exists(data_file_path): # todo: get lock
+            try:
+                with open(data_file_path, 'rb') as entry_file:
+                    data = entry_file.read()
+
+                    key, value = data.decode('utf-8').split(': ', 1)
+                    self.indexer.inc_read()
+                    return key, value
+            except Exception as e:
+                print(f"Error reading file {data_file_path}: {e}")
+                return None, None
+        else:
+            print(f"File not found: {data_file_path}")
+            return None, None
+
     def write_segment_path(self):
         segment_number = self.write_segment_number()
         return self.__path(segment_number)
