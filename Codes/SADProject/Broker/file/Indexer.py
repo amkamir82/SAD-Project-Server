@@ -15,35 +15,21 @@ class Indexer(object):
         self.load()
 
     def save(self):
-        with self._write_lock, self._read_lock, self._sync_lock:
-            dictionary = {'partition': self.partition, 'write': self._write, 'read': self._read, 'sync': self._sync}
-
-            file_path = self.__path()
-            with open(file_path, 'w') as file:
-                json.dump(dictionary, file)
-
-            print(f'Indexes saved to {file_path}')
+        self._save_variable(self._write, 'write')
+        self._save_variable(self._read, 'read')
+        self._save_variable(self._sync, 'sync')
 
     def load(self):
-        with self._write_lock, self._read_lock, self._sync_lock:
-            file_path = self.__path()
+        self._write = self._load_variable('write')
+        self._read = self._load_variable('read')
+        self._sync = self._load_variable('sync')
 
-            if os.path.exists(file_path):
-                with open(file_path, 'r') as file:
-                    loaded_dict = json.load(file)
-
-                self._write = loaded_dict['write']
-                self._read = loaded_dict['read']
-                self._sync = loaded_dict['sync']
-
-                print(
-                    f'Dictionary loaded from {file_path}, write: {self._write}, read: {self._read}, sync: {self._sync}')
-            else:
-                print(f'File {file_path} does not exist. Setting to zero all indexes')
+        print(f'indexes loaded, write: {self._write}, read: {self._read}, sync: {self._sync}')
 
     def inc_write(self):
         with self._write_lock:
             self._write += 1
+            self._save_variable(self._write, 'write')
 
     def get_write(self):
         return self._write
@@ -51,6 +37,7 @@ class Indexer(object):
     def inc_read(self):
         with self._read_lock:
             self._read += 1
+            self._save_variable(self._read, 'read')
 
     def get_read(self):
         return self._read
@@ -58,10 +45,30 @@ class Indexer(object):
     def inc_sync(self):
         with self._sync_lock:
             self._sync += 1
+            self._save_variable(self._sync, 'sync')
 
     def get_sync(self):
         return self._sync
 
-    def __path(self):
+    def _save_variable(self, value, action):
+        file_path = self.__path(action)
+        with open(file_path, 'w') as file:
+            json.dump(value, file)
+
+        print(f'{action} index saved to {file_path}')
+
+    def _load_variable(self, action):
+        file_path = self.__path(action)
+
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as file:
+                loaded_value = json.load(file)
+
+            return loaded_value
+        else:
+            print(f'File {file_path} does not exist. Returning 0 for {action}')
+            return 0
+
+    def __path(self, action: str) -> str:
         current_working_directory = os.getcwd()
-        return os.path.join(current_working_directory, 'indexes.json', self.partition)
+        return os.path.join(current_working_directory, self.partition, f'{action}_index')
