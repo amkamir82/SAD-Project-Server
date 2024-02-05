@@ -4,15 +4,18 @@ import threading
 
 
 class Indexer(object):
+    _write_lock = threading.Lock()
+    _read_lock = threading.Lock()
+    _sync_lock = threading.Lock()
+
     def __init__(self, partition: str):
         self.partition = partition
         self._write = 0
         self._read = 0
         self._sync = 0
-        self._write_lock = threading.Lock()
-        self._read_lock = threading.Lock()
-        self._sync_lock = threading.Lock()
         self.load()
+        path = self.__dir_path()
+        os.makedirs(path, exist_ok=True)
 
     def save(self):
         self._save_variable(self._write, 'write')
@@ -52,7 +55,7 @@ class Indexer(object):
 
     def _save_variable(self, value, action):
         file_path = self.__path(action)
-        with open(file_path, 'w') as file:
+        with open(file_path, 'w+') as file:
             json.dump(value, file)
 
         print(f'{action} index saved to {file_path}')
@@ -71,4 +74,8 @@ class Indexer(object):
 
     def __path(self, action: str) -> str:
         current_working_directory = os.getcwd()
-        return os.path.join(current_working_directory, self.partition, f'{action}_index')
+        return os.path.join(current_working_directory, f'partition_index_{self.partition}', f'{action}_index')
+
+    def __dir_path(self) -> str:
+        current_working_directory = os.getcwd()
+        return os.path.join(current_working_directory, f'partition_index_{self.partition}')

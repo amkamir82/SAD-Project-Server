@@ -19,10 +19,6 @@ class Segment(object):
                 cls._instances[partition].indexer = Indexer(partition)
             return cls._instances[partition]
 
-    def __init__(self, partition: str):
-        self.partition = partition
-        self.indexer = Indexer(partition)
-
     def append(self, key: str, value: bytes):
         with self._append_lock:
             segment_path = self.write_segment_path()
@@ -32,7 +28,7 @@ class Segment(object):
             data_file_path = os.path.join(segment_path, f'{self.indexer.get_write()}.dat')
             kb = 1024
 
-            with open(data_file_path, 'wb') as entry_file:
+            with open(data_file_path, 'wb+') as entry_file:
                 entry_file.write(f'{key}: '.encode('utf-8'))
                 for i in range(0, len(value), kb):
                     chunk = value[i:i + kb]
@@ -58,4 +54,4 @@ class Segment(object):
 
     def __path(self, segment_number: int) -> str:
         current_working_directory = os.getcwd()
-        return os.path.join(current_working_directory, self.partition, str(segment_number))
+        return os.path.join(current_working_directory, f'partition_data_{self.partition}', f'segment_{segment_number}')
