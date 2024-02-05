@@ -54,4 +54,5 @@ class Segment(object):
 
     def __path(self, segment_number: int) -> str:
         current_working_directory = os.getcwd()
-        return os.path.join(current_working_directory, f'partition_data_{self.partition}', f'segment_{segment_number}')
+        return os.path.join(current_working_directory, 'partition_data', f'{self.partition}',
+                            f'segment_{segment_number}')

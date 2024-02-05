@@ -74,8 +74,8 @@ class Indexer(object):
 
     def __path(self, action: str) -> str:
         current_working_directory = os.getcwd()
-        return os.path.join(current_working_directory, f'partition_index_{self.partition}', f'{action}_index')
+        return os.path.join(current_working_directory, 'partition_index', f'{self.partition}', f'{action}_index')
 
     def __dir_path(self) -> str:
         current_working_directory = os.getcwd()
-        return os.path.join(current_working_directory, f'partition_index_{self.partition}')
+        return os.path.join(current_working_directory, 'partition_index', f'{self.partition}')
