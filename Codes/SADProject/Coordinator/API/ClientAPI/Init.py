@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 
 app = Flask(__name__)
 
@@ -10,7 +10,8 @@ def welcome():
 
 @app.route('/init')
 def init():
-    return [
+    mock = [
         'http://127.0.0.1:1300',
         'http://127.0.0.1:1301',
     ]
+    return jsonify(mock)
