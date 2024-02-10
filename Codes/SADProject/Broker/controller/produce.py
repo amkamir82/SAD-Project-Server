@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def welcome():
-    return 'Welcome to the Broker API!'
+    return 'Welcome to the Broker api!'
 
 
 @app.route('/write', methods=['POST'])

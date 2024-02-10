@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def welcome():
-    return 'Welcome to the Client API!'
+    return 'Welcome to the Client api!'
 
 
 @app.route('/init')
