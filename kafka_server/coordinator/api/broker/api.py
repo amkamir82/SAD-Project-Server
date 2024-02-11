@@ -1,12 +1,12 @@
 from flask import Blueprint, jsonify, request
 import os
 import sys
+
+import random
+from coordinator.services.broker import database as broker_database
+
 COORDINATOR_PROJECT_PATH = os.getenv("COORDINATOR_PROJECT_PATH", "/app/")
 sys.path.append(os.path.abspath(COORDINATOR_PROJECT_PATH))
-
-from services.broker import database as broker_database
-import requests
-import random
 
 api_blueprint = Blueprint('api', __name__)
 
@@ -15,7 +15,7 @@ api_blueprint = Blueprint('api', __name__)
 def init_broker():
     remote_addr = (request.headers.environ["REMOTE_ADDR"], request.headers.environ["REMOTE_PORT"])
     broker_id = request.data.decode("utf-8")
-    response_code = broker_database.add_broker_to_database(broker_id,remote_addr)
+    response_code = broker_database.add_broker_to_database(broker_id, remote_addr)
     if response_code != 200:
         return jsonify("Error during initializing broker"), response_code
 

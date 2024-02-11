@@ -15,3 +15,9 @@ def list_all_clients():
 
     response_data = json.loads(r.content.decode('utf-8'))
     return r.status_code, response_data
+
+
+def add_subscription_plan(broker_url, client_url, subscription_id):
+    r = requests.post("http://127.0.0.1:5001/subscribe/add", data=json.dumps(
+        {"broker_url": broker_url, "client_url": client_url, "subscription_id": subscription_id}))
+    return r.status_code

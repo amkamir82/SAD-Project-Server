@@ -1,9 +1,8 @@
 from flask import Flask, request, jsonify
-from coordinator_database.services import client
-from coordinator_database.services import broker
 import threading
 import concurrent.futures
 import json
+from coordinator_database.services import client, broker, subscribe
 
 app = Flask(__name__)
 
@@ -56,9 +55,20 @@ def add_replica_for_a_broker():
     data = json.loads(request.data.decode('utf-8'))
     broker_id = data["broker_id"]
     replica = data["replica"]
-    print()
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future = executor.submit(broker.add_replica_for_a_broker, broker_id, replica)
+        result = future.result()
+    return jsonify("Successfully added replica"), 200
+
+
+@app.route('/subscribe/add', methods=['POST'])
+def add_subscription_plan():
+    data = json.loads(request.data.decode('utf-8'))
+    broker_url = data["broker_url"]
+    client_url = data["client_url"]
+    subscription_id = data["subscription_id"]
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future = executor.submit(subscribe.add_subscription, broker_url, client_url, subscription_id)
         result = future.result()
     return jsonify("Successfully added replica"), 200
 
