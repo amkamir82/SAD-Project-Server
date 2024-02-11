@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
-from SADProject.coordinator_database.services import client
-from SADProject.coordinator_database.services import broker
+from coordinator_database.services import client
+from coordinator_database.services import broker
 import threading
 import concurrent.futures
 

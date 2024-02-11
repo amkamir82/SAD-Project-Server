@@ -1,5 +1,5 @@
 import threading
-from SADProject.coordinator_database import config
+from coordinator_database import config
 import json
 import os.path
 
