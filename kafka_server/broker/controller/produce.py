@@ -1,14 +1,21 @@
 from flask import Flask, request, jsonify
 
-from Codes.SADProject.Broker.file.Indexer import Indexer
-from Codes.SADProject.Broker.file.write import Write
+import sys 
+import os
+
+BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
+sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
+
+
+from file.indexer import Indexer
+from file.write import Write
 
 app = Flask(__name__)
 
 
 @app.route('/')
 def welcome():
-    return f'Welcome to the Broker API!'
+    return 'Welcome to the Broker API!'
 
 
 @app.route('/write', methods=['POST'])
@@ -89,4 +96,4 @@ def replicate():
 
 if __name__ == '__main__':
     # port = int(input())
-    app.run(port=5003, debug=True)
+    app.run('0.0.0.0', port=5003, debug=True)

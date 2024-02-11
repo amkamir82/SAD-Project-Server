@@ -8,4 +8,4 @@ app.register_blueprint(client_api, name="client_api", url_prefix='/client')
 app.register_blueprint(broker_api, name="broker_api", url_prefix='/broker')
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run('0.0.0.0', port=5000, debug=True)

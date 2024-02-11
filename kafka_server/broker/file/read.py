@@ -3,9 +3,16 @@ import os
 import requests
 import threading
 
-from Codes.SADProject.Broker.file.hash import hash_md5
-from Codes.SADProject.Broker.file.segment import Segment
-from Codes.SADProject.Broker.manager.partitionManager import PartitionManager
+import sys
+
+
+BROKER_PROJECT_PATH=os.getenv("BROKER_PROJECT_PATH", "/app/")
+sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
+
+
+from file.hash import hash_md5
+from file.segment import Segment
+from manager.partition_manager import PartitionManager
 
 
 class Read(object):

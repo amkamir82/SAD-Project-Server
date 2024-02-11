@@ -1,7 +1,12 @@
 import os
+import sys
 import threading
 
-from Codes.SADProject.Broker.file.Indexer import Indexer
+BROKER_PROJECT_PATH=os.getenv("BROKER_PROJECT_PATH", "/app/")
+sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
+
+
+from file.indexer import Indexer
 
 SEGMENT_SIZE = 100
 
