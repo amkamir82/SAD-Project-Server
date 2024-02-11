@@ -1,11 +1,11 @@
 from flask import Blueprint, jsonify, request
-from SADProject.coordinator.services.broker import database as broker_database
+from coordinator.services.broker import database as broker_database
 import requests
 
 api_blueprint = Blueprint('api', __name__)
 
 
-@api_blueprint.route('/init_broker', methods=['GET'])
+@api_blueprint.route('/init', methods=['GET'])
 def init_broker():
     remote_addr = (request.headers.environ["REMOTE_ADDR"], request.headers.environ["REMOTE_PORT"])
 
@@ -16,7 +16,7 @@ def init_broker():
     return jsonify("Broker successfully initialized"), 200
 
 
-@api_blueprint.route('/list_all', methods=['GET'])
+@api_blueprint.route('/list', methods=['GET'])
 def list_all_brokers():
     response_code, response_data = broker_database.list_all_brokers()
     if response_code != 200:
