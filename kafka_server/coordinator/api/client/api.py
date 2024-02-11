@@ -24,7 +24,7 @@ def init_client():
 def list_all_clients():
     response_code, response_data = client_database.list_all_clients()
     if response_code != 200:
-        return jsonify("Error during getting list of brokers from database"), response_code
+        return jsonify("Error during getting list of clients from database"), response_code
 
     return response_data, 200
 
