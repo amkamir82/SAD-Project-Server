@@ -4,4 +4,4 @@ class PartitionManager(object):
         self.partition = partition
 
     def partition_count(self):
-        return 3;
+        return 3
