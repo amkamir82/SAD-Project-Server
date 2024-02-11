@@ -1,15 +1,27 @@
 import threading
 import time
+import schedule
 
-from Codes.SADProject.Broker.read.read_crun import *
+from Codes.SADProject.Broker.read.read_crun import schedule_read
 
-def second_thread_function():
+from Codes.SADProject.Broker.controller.coordinator import heartbeat
+
+
+def schedule_read_thread():
     schedule_read()
     while True:
         schedule.run_pending()
         time.sleep(1)
 
 
-second_thread = threading.Thread(target=second_thread_function)
-second_thread.daemon = True
-second_thread.start()
+def send_heartbeat():
+    heartbeat()
+
+
+read_thread = threading.Thread(target=schedule_read_thread)
+read_thread.daemon = True
+read_thread.start()
+
+heartbeat_thread = threading.Thread(target=send_heartbeat)
+heartbeat_thread.daemon = True
+heartbeat_thread.start()
