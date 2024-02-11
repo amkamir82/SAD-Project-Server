@@ -10,31 +10,55 @@ class Segment(object):
     _instances = {}
     _instances_lock = threading.Lock()
     _append_lock = threading.Lock()
+    _read_lock = threading.Lock()
 
-    def __new__(cls, partition: str):
+    def __new__(cls, partition: str, replica: str):
         with cls._instances_lock:
             if partition not in cls._instances:
                 cls._instances[partition] = super(Segment, cls).__new__(cls)
                 cls._instances[partition].partition = partition
-                cls._instances[partition].indexer = Indexer(partition)
+                cls._instances[partition].indexer = Indexer(partition, replica)
             return cls._instances[partition]
 
     def append(self, key: str, value: bytes):
-        with self._append_lock:
-            segment_path = self.write_segment_path()
-            if self.indexer.get_write() % SEGMENT_SIZE == 0:
-                os.makedirs(segment_path, exist_ok=True)
+        try:
+            with self._append_lock:
+                segment_path = self.write_segment_path()
+                if self.indexer.get_write() % SEGMENT_SIZE == 0:
+                    os.makedirs(segment_path, exist_ok=True)
 
-            data_file_path = os.path.join(segment_path, f'{self.indexer.get_write()}.dat')
-            kb = 1024
+                data_file_path = os.path.join(segment_path, f'{self.indexer.get_write()}.dat')
+                kb = 1024
 
-            with open(data_file_path, 'wb+') as entry_file:
-                entry_file.write(f'{key}: '.encode('utf-8'))
-                for i in range(0, len(value), kb):
-                    chunk = value[i:i + kb]
-                    entry_file.write(chunk)
+                with open(data_file_path, 'wb+') as entry_file:
+                    entry_file.write(f'{key}: '.encode('utf-8'))
+                    for i in range(0, len(value), kb):
+                        chunk = value[i:i + kb]
+                        entry_file.write(chunk)
+        except Exception as e:
+            print(f"Error appending data to segment: {e}")
+            return False
+        return True
 
-            self.indexer.inc_write()
+        # self.indexer.inc_write()
+
+    def approve_appending(self):
+        try:
+            with self._append_lock:
+                self.indexer.inc_write()
+        except Exception as e:
+            print(f"Error inc write index: {e}")
+            return False
+        return True
+
+    def approve_reading(self):
+        try:
+            with self._read_lock:
+                self.indexer.inc_read()
+        except Exception as e:
+            print(f"Error inc read index: {e}")
+            return False
+        return True
 
     def read(self):
         read_index = self.indexer.get_read()
@@ -42,13 +66,12 @@ class Segment(object):
 
         data_file_path = os.path.join(segment_path, f'{read_index}.dat')
 
-        if os.path.exists(data_file_path): # todo: get lock
+        if os.path.exists(data_file_path):  # todo: get lock
             try:
                 with open(data_file_path, 'rb') as entry_file:
                     data = entry_file.read()
 
                     key, value = data.decode('utf-8').split(': ', 1)
-                    self.indexer.inc_read()
                     return key, value
             except Exception as e:
                 print(f"Error reading file {data_file_path}: {e}")
@@ -82,3 +105,9 @@ class Segment(object):
             f'{self.partition}',
             f'segment_{segment_number}'
         )
+
+    def get_read_index(self) -> int:
+        return self.indexer.get_read()
+
+    def get_write_index(self) -> int:
+        return self.indexer.get_write()
