@@ -1,7 +1,9 @@
-from flask import Flask, request, jsonify
-
-import sys 
+import time
 import os
+import sys
+
+from prometheus_client import make_wsgi_app
+from flask import Flask, request, jsonify
 
 BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
 sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
@@ -9,8 +11,19 @@ sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
 
 from file.indexer import Indexer
 from file.write import Write
+from metrics import (
+    coordinator_write_requests,
+    coordinator_replicate_index_requests,
+    coordinator_replicate_data_requests,
+    coordinator_subscribe_requests,
+)
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 app = Flask(__name__)
+app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
+    '/metrics': make_wsgi_app()
+})
+
 
 
 @app.route('/')
@@ -21,6 +34,7 @@ def welcome():
 @app.route('/write', methods=['POST'])
 def write():
     try:
+        coordinator_write_requests.inc()
         # Assuming the request body is in JSON format with 'key' and 'value' fields
         data = request.get_json()
         key = data.get('key')
@@ -44,6 +58,7 @@ def replicate_data():
         data = request.get_json()
         key = data.get('key')
         value = data.get('value').encode('utf-8')
+        coordinator_replicate_data_requests.inc()
 
         if not key or not value:
             return jsonify({'error': 'Invalid request. Missing key or value.'}), 400
@@ -68,6 +83,7 @@ def replicate_index():
         partition = data.get('partition')
         read = data.get('read')
         sync = data.get('sync')
+        coordinator_replicate_index_requests.inc()
 
         indexer = Indexer(partition, '')
         indexer.update_read_sync(int(read), int(sync))
@@ -84,6 +100,7 @@ def replicate():
         data = request.get_json()
         key = data.get('key')
         value = data.get('value')
+        coordinator_subscribe_requests.inc()
 
         print(f'key: {key}, value: {value}')
 
