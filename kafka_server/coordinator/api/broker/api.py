@@ -1,5 +1,10 @@
 from flask import Blueprint, jsonify, request
-from coordinator.services.broker import database as broker_database
+import os
+import sys
+COORDINATOR_PROJECT_PATH = os.getenv("COORDINATOR_PROJECT_PATH", "/app/")
+sys.path.append(os.path.abspath(COORDINATOR_PROJECT_PATH))
+
+from services.broker import database as broker_database
 import requests
 
 api_blueprint = Blueprint('api', __name__)

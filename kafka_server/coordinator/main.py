@@ -1,4 +1,12 @@
+import os
+import sys
+
 from flask import Flask
+
+
+COORDINATOR_PROJECT_PATH = os.getenv("COORDINATOR_PROJECT_PATH", "/app/")
+sys.path.append(os.path.abspath(COORDINATOR_PROJECT_PATH))
+
 from api.client.api import api_blueprint as client_api
 from api.broker.api import api_blueprint as broker_api
 

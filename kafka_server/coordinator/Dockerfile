@@ -1,5 +1,6 @@
 FROM python:3.10-slim-buster
 WORKDIR /app
+ARG COORDINATOR_PROJECT_PATH=defaultValue
 COPY requirements.txt /app
 RUN pip install -r requirements.txt
 COPY . .
