@@ -1,9 +1,16 @@
 import threading
 import requests
+import os
+import sys
 
-from Codes.SADProject.Broker.file.segment import Segment
-from Codes.SADProject.Broker.file.hash import hash_md5
-from Codes.SADProject.Broker.manager.partitionManager import PartitionManager
+BROKER_PROJECT_PATH=os.getenv("BROKER_PROJECT_PATH", "/app/")
+sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
+
+
+
+from file.segment import Segment
+from file.hash import hash_md5
+from manager.partition_manager import PartitionManager
 
 
 class Write(object):

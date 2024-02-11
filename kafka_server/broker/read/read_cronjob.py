@@ -1,5 +1,10 @@
 import schedule
-from Codes.SADProject.Broker.file.read import Read
+
+import sys, os
+BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
+sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
+
+from file.read import Read
 
 
 def read_sample_data():
@@ -8,7 +13,7 @@ def read_sample_data():
     read_instance = Read(partition, 'http://localhost:5001')
 
     print(read_instance.read_data())
-    # todo: send to subscriber
+    # TODO: send to subscriber
 
 
 def schedule_read():

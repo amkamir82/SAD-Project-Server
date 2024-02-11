@@ -7,7 +7,6 @@ app = Flask(__name__)
 def welcome():
     return 'Welcome to the Client api!'
 
-
 @app.route('/init')
 def init():
     mock = [
