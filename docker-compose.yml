@@ -3,35 +3,41 @@ version: '3'
 services:
 
   coordinator-1:
-    build: './kafka_server/coordinator/'
+    # build: './kafka_server/coordinator/' # use for local build
+    image: mahdigheidi/sad-coordinator # on production server
+    platform: linux/arm64
     ports:
       - '5003:5000'
     networks:
       - broker
 
   coordinator-2:
-    build: './kafka_server/coordinator/'
+    # build: './kafka_server/coordinator/'
+    image: mahdigheidi/sad-coordinator # on production server
     ports:
       - '5004:5000'
     networks:
       - broker
 
   broker-1:
-    build: './kafka_server/broker/'
+    # build: './kafka_server/broker/'
+    image: mahdigheidi/sad-broker # on production server
     ports:
       - '5678:5003'
     networks:
       - broker
 
   broker-2:
-    build: './kafka_server/broker/'
+    # build: './kafka_server/broker/'
+    image: mahdigheidi/sad-broker # on production server
     ports:
       - '5679:5003'
     networks:
       - broker
 
   broker-3:
-    build: './kafka_server/broker/'
+    # build: './kafka_server/broker/'
+    image: mahdigheidi/sad-broker # on production server
     ports:
       - '5680:5003'
     networks:

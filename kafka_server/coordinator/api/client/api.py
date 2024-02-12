@@ -4,7 +4,7 @@ import random
 import datetime
 from flask import Blueprint, request, jsonify
 
-from coordinator.services.broker import subscribe as broker_subscribe
+from coordinator.services.broker import subscribe as broker_subscribe_service
 from coordinator.services.client import database as client_database
 from coordinator.services.broker import database as broker_database
 import json
@@ -17,9 +17,10 @@ api_blueprint = Blueprint('api', __name__)
 
 @api_blueprint.route('/init', methods=['GET'])
 def init_client():
-    remote_addr = (request.headers.environ["REMOTE_ADDR"], request.headers.environ["REMOTE_PORT"])
+    data = json.loads(request.data.decode('utf-8'))
+    client_addr = f'{data["ip"]}:{data["port"]}'
 
-    response_code = client_database.add_client_to_database(remote_addr)
+    response_code = client_database.add_client_to_database(client_addr)
     if response_code != 200:
         return jsonify("Error during initializing client"), response_code
 
@@ -46,15 +47,24 @@ def subscribe():
 
     random_id = random.randint(1, 10000)
 
-    response_code, response_data = broker_database.list_all_brokers()
+    response_code, all_subscriptions = broker_subscribe_service.get_all_subscriptions()
+    if response_code != 200:
+        return jsonify("Error during getting list of brokers from database"), response_code
 
+    response_code, response_data = broker_database.list_all_brokers()
     if response_code != 200:
         return jsonify("Error during getting list of brokers from database"), response_code
 
     selected_broker_id = random.choice(list(response_data.keys()))
     broker_url = f"{response_data[selected_broker_id][0]}:{response_data[selected_broker_id][1]}"
 
-    response_code = broker_subscribe.send_subscribe_to_broker(broker_url, client_addr, random_id)
+    tmp_dict = {}
+    if broker_url in all_subscriptions:
+        tmp_dict = all_subscriptions[broker_url]
+        tmp_dict[broker_url].append((client_addr, random_id))
+    else:
+        tmp_dict[broker_url] = [(client_addr, random_id)]
+    response_code = broker_subscribe_service.send_subscribe_to_broker(broker_url, tmp_dict)
     if response_code != 200:
         return jsonify("Error during sending subscription to broker"), response_code
 
@@ -69,10 +79,10 @@ def subscribe():
 def heartbeat():
     data = json.loads(request.data.decode('utf-8'))
     client_addr = f'{data["ip"]}:{data["port"]}'
-    time = datetime.datetime.now()
+    time = datetime.datetime.now().timestamp()
 
     response_code = client_database.update_heartbeat_status(client_addr, time)
     if response_code != 200:
-        return jsonify("Error during send heartbeat to database"), response_code
+        return jsonify("Error during send client heartbeat to database"), response_code
 
-    return jsonify("Heartbeat successfully updated"), 200
+    return jsonify("Client heartbeat successfully updated"), 200
