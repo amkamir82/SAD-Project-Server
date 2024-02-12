@@ -35,7 +35,7 @@ jobs:
           tags: mahdigheidi/sad-broker:latest
 
 
-  build-and-push-coordinator:
+  build-push-coordinator:
     runs-on: ubuntu-latest
     steps:
       -
