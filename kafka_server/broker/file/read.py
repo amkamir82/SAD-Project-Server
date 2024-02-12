@@ -66,9 +66,15 @@ class Read(object):
                 self.segment.approve_reading()
                 return self.read_data()
 
+            self.message_in_fly = True
+            self.save_message_in_fly()
+
             sent = self.send_to_subscriber(key, value)
             if sent:
                 self.segment.approve_reading()
+
+            self.message_in_fly = False
+            self.save_message_in_fly()
 
             return sent
 
