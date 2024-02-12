@@ -1,13 +1,15 @@
 import os
 import sys
-
+import random
 from flask import Blueprint, request, jsonify
+
+from coordinator.services.broker import subscribe as broker_subscribe
+from coordinator.services.client import database as client_database
+from coordinator.services.broker import database as broker_database
+import json
 
 COORDINATOR_PROJECT_PATH = os.getenv("COORDINATOR_PROJECT_PATH", "/app/")
 sys.path.append(os.path.abspath(COORDINATOR_PROJECT_PATH))
-
-from services.client import database as client_database
-from services.broker import database as broker_database
 
 api_blueprint = Blueprint('api', __name__)
 
@@ -31,11 +33,32 @@ def init_client():
 def list_all_clients():
     response_code, response_data = client_database.list_all_clients()
     if response_code != 200:
-        return jsonify("Error during getting list of brokers from database"), response_code
+        return jsonify("Error during getting list of clients from database"), response_code
 
     return response_data, 200
 
 
 @api_blueprint.route('/subscribe', methods=['POST'])
 def subscribe():
-    return 'Hello from api!'
+    data = json.loads(request.data.decode('utf-8'))
+    client_addr = f'{data["ip"]}:{data["port"]}'
+
+    random_id = random.randint(1, 10000)
+
+    response_code, response_data = broker_database.list_all_brokers()
+
+    if response_code != 200:
+        return jsonify("Error during getting list of brokers from database"), response_code
+
+    selected_broker_id = random.choice(list(response_data.keys()))
+    broker_url = f"{response_data[selected_broker_id][0]}:{response_data[selected_broker_id][1]}"
+
+    # response_code = broker_subscribe.send_subscribe_to_broker(broker_url, client_addr, random_id)
+    # if response_code != 200:
+    #     return jsonify("Error during sending subscription to broker"), response_code
+
+    response_code = client_database.add_subscription_plan(broker_url, client_addr, random_id)
+    if response_code != 200:
+        return jsonify("Error during adding subscription to database"), response_code
+
+    return jsonify({"broker_url": broker_url, "selected_id": random_id}), 200

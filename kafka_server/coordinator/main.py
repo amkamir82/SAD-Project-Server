@@ -3,7 +3,6 @@ import sys
 
 from flask import Flask
 
-
 COORDINATOR_PROJECT_PATH = os.getenv("COORDINATOR_PROJECT_PATH", "/app/")
 sys.path.append(os.path.abspath(COORDINATOR_PROJECT_PATH))
 
