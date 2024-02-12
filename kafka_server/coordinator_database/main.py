@@ -73,5 +73,16 @@ def add_subscription_plan():
     return jsonify("Successfully added replica"), 200
 
 
+@app.route('/client/heartbeat', methods=['POST'])
+def update_heartbeat():
+    data = json.loads(request.data.decode('utf-8'))
+    client_url = data["client_url"]
+    time = data["time"]
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future = executor.submit(client.update_heartbeat, client_url, time)
+        result = future.result()
+    return jsonify("Successfully added replica"), 200
+
+
 if __name__ == '__main__':
     app.run(port=5001, debug=True)

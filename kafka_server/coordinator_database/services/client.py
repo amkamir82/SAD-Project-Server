@@ -34,3 +34,24 @@ def get_all_clients():
             json_data = json.load(f)
 
     return json_data["clients"]
+
+
+def init_heartbeat_file():
+    path = f'./{config.HEARTBEAT_DATABASE_FILE_PATH}'
+    check_file = os.path.isfile(path)
+    if not check_file:
+        with open(path, 'w') as f:
+            f.write(json.dumps({"clients": {}}))
+
+
+def update_heartbeat(client_url, time):
+    with lock:
+        init_heartbeat_file()
+        json_data = None
+        with open(config.HEARTBEAT_DATABASE_FILE_PATH, 'r') as f:
+            json_data = json.load(f)
+            f.close()
+        with open(config.HEARTBEAT_DATABASE_FILE_PATH, 'w') as f:
+            json_data["clients"][client_url] = time
+            f.write(json.dumps(json_data))
+            f.close()

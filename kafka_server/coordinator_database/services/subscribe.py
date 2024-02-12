@@ -22,8 +22,8 @@ def add_subscription(broker_url, client_url, subscription_id):
             json_data = json.load(f)
             f.close()
         with open(config.SUBSCRIBER_DATABASE_FILE_PATH, 'w') as f:
-            if client_url not in json_data['subscriptions']:
+            if broker_url not in json_data['subscriptions']:
                 json_data['subscriptions'][client_url] = []
-            json_data["subscriptions"][client_url].append((broker_url, subscription_id))
+            json_data["subscriptions"][broker_url].append((client_url, subscription_id))
             f.write(json.dumps(json_data))
             f.close()
