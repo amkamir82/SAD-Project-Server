@@ -1,6 +1,7 @@
 import os
 import sys
 import random
+import datetime
 from flask import Blueprint, request, jsonify
 
 from coordinator.services.broker import subscribe as broker_subscribe
@@ -53,12 +54,25 @@ def subscribe():
     selected_broker_id = random.choice(list(response_data.keys()))
     broker_url = f"{response_data[selected_broker_id][0]}:{response_data[selected_broker_id][1]}"
 
-    # response_code = broker_subscribe.send_subscribe_to_broker(broker_url, client_addr, random_id)
-    # if response_code != 200:
-    #     return jsonify("Error during sending subscription to broker"), response_code
+    response_code = broker_subscribe.send_subscribe_to_broker(broker_url, client_addr, random_id)
+    if response_code != 200:
+        return jsonify("Error during sending subscription to broker"), response_code
 
     response_code = client_database.add_subscription_plan(broker_url, client_addr, random_id)
     if response_code != 200:
         return jsonify("Error during adding subscription to database"), response_code
 
     return jsonify({"broker_url": broker_url, "selected_id": random_id}), 200
+
+
+@api_blueprint.route('/heartbeat', methods=['POST'])
+def heartbeat():
+    data = json.loads(request.data.decode('utf-8'))
+    client_addr = f'{data["ip"]}:{data["port"]}'
+    time = datetime.datetime.now()
+
+    response_code = client_database.update_heartbeat_status(client_addr, time)
+    if response_code != 200:
+        return jsonify("Error during send heartbeat to database"), response_code
+
+    return jsonify("Heartbeat successfully updated"), 200
