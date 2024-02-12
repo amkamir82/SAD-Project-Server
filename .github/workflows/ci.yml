@@ -55,7 +55,6 @@ jobs:
   build-broker:
     name: Build Broker Image
     runs-on: ubuntu-latest
-    needs: lint-test
     
     steps:
       - name: Checkout code
@@ -68,7 +67,6 @@ jobs:
   build-coordinator:
     name: Build Coordinator Image
     runs-on: ubuntu-latest
-    needs: lint-test
     
     steps:
       - name: Checkout code
