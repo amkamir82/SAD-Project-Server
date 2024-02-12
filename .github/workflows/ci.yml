@@ -62,7 +62,8 @@ jobs:
         
       - name: Build Docker image
         run: |
-          docker build -t your-image-name .
+          ls -lh
+          docker build -t sad-broker .
   
   build-coordinator:
     name: Build Coordinator Image
@@ -74,7 +75,7 @@ jobs:
         
       - name: Build Docker image
         run: |
-          docker build -t your-image-name .
+          docker build -t sad-coordinator .
 
   push-broker:
     name: Push Broker Image
