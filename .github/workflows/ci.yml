@@ -7,7 +7,7 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build:
+  lint-and-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -28,4 +28,112 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
+
+  static-code-analysis:
+    name: Static Code Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Install bandit
+        run: |
+          pip install bandit
+
+      - name: Run bandit
+        run: |
+          bandit -r .
+
+
   
+  build-broker:
+    name: Build Broker Image
+    runs-on: ubuntu-latest
+    needs: lint-test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      - name: Build Docker image
+        run: |
+          docker build -t your-image-name .
+  
+  build-coordinator:
+    name: Build Coordinator Image
+    runs-on: ubuntu-latest
+    needs: lint-test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      - name: Build Docker image
+        run: |
+          docker build -t your-image-name .
+
+  push-broker:
+    name: Push Broker Image
+    runs-on: ubuntu-latest
+    needs: build-docker
+    
+    steps:
+      - name: Log into GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Docker image
+        run: |
+          docker tag your-image-name:latest ghcr.io/your-github-username/your-repo-name:latest
+          docker push ghcr.io/your-github-username/your-repo-name:latest
+  
+  push-coordinator:
+    name: Push Coorinator Image
+    runs-on: ubuntu-latest
+    needs: build-docker
+    
+    steps:
+      - name: Log into GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Docker image
+        run: |
+          docker tag your-image-name:latest ghcr.io/your-github-username/your-repo-name:latest
+          docker push ghcr.io/your-github-username/your-repo-name:latest
+  
+  deploy-prod-broker:
+    name: Deploy Broker to Production
+    runs-on: ubuntu-latest
+    needs: push-broker
+
+    steps:
+      - name: Deploy to production
+        run: |
+          # Here you can add your deployment commands/scripts
+          # For example:
+          ssh user@your-production-server 'docker pull ghcr.io/your-github-username/your-repo-name:latest && docker-compose up -d'
+
+  deploy-prod-coordinator:
+    name: Deploy Coordinator to Production
+    runs-on: ubuntu-latest
+    needs: push-coordinator
+
+    steps:
+      - name: Deploy to production
+        run: |
+          # Here you can add your deployment commands/scripts
+          # For example:
+          ssh user@your-production-server 'docker pull ghcr.io/your-github-username/your-repo-name:latest && docker-compose up -d'
