@@ -63,7 +63,7 @@ jobs:
       - name: Build Docker image
         run: |
           ls -lh
-          docker build -t sad-broker .
+          docker build -t sad-broker ./kafka_server/broker/
   
   build-coordinator:
     name: Build Coordinator Image
@@ -75,7 +75,7 @@ jobs:
         
       - name: Build Docker image
         run: |
-          docker build -t sad-coordinator .
+          docker build -t sad-coordinator ./kafka_server/coordinator/
 
   push-broker:
     name: Push Broker Image
@@ -92,7 +92,7 @@ jobs:
 
       - name: Push Docker image
         run: |
-          docker tag your-image-name:latest ghcr.io/your-github-username/your-repo-name:latest
+          docker tag sad-broker:latest ghcr.io/your-github-username/your-repo-name:latest
           docker push ghcr.io/your-github-username/your-repo-name:latest
   
   push-coordinator:
@@ -110,7 +110,7 @@ jobs:
 
       - name: Push Docker image
         run: |
-          docker tag your-image-name:latest ghcr.io/your-github-username/your-repo-name:latest
+          docker tag sad-coordinator:latest ghcr.io/your-github-username/your-repo-name:latest
           docker push ghcr.io/your-github-username/your-repo-name:latest
   
   deploy-prod-broker:
