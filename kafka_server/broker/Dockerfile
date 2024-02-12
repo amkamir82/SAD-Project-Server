@@ -7,4 +7,4 @@ COPY . .
 RUN pip install -r requirements.txt
 EXPOSE 5003
 ENV FLASK_APP=app
-CMD ["python","controller/produce.py"]
+CMD ["python", "-u", "controller/produce.py"]

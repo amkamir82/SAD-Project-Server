@@ -5,11 +5,11 @@ import requests
 
 
 def _master_coordinator_url() -> str:
-    return os.getenv('MASTER_COORDINATOR_URL')
+    return os.getenv('MASTER_COORDINATOR_URL', '')
 
 
 def _replica_coordinator_url() -> str:
-    return os.getenv('REPLICA_COORDINATOR_URL')
+    return os.getenv('REPLICA_COORDINATOR_URL', '')
 
 
 def _url(master_not_replica: bool, url: str) -> str:

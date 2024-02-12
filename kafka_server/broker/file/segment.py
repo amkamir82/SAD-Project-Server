@@ -105,7 +105,7 @@ class Segment(object):
         current_working_directory = os.getcwd()
         return os.path.join(
             current_working_directory,
-            '../data',
+            'data',
             'partition_data',
             f'{self.partition}',
             f'segment_{segment_number}'
