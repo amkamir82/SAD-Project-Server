@@ -74,7 +74,7 @@ def add_subscription_plan():
 
 
 @app.route('/client/heartbeat', methods=['POST'])
-def update_heartbeat():
+def update_client_heartbeat():
     data = json.loads(request.data.decode('utf-8'))
     client_url = data["client_url"]
     time = data["time"]
@@ -85,7 +85,7 @@ def update_heartbeat():
 
 
 @app.route('/client/list_all_heartbeats', methods=['GET'])
-def list_all_heartbeats():
+def list_all_client_heartbeats():
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future = executor.submit(client.get_all_heartbeats)
         result = future.result()
@@ -93,7 +93,7 @@ def list_all_heartbeats():
 
 
 @app.route('/client/delete_heartbeat', methods=['POST'])
-def delete_heartbeat():
+def delete_client_heartbeat():
     data = json.loads(request.data.decode('utf-8'))
     client_url = data["client_url"]
     with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -127,6 +127,17 @@ def get_all_subscriptions():
         except:
             return jsonify("Error deleting subscription"), 500
     return jsonify(result), 200
+
+
+@app.route('/broker/add_heartbeat', methods=['POST'])
+def update_broker_heartbeat():
+    data = json.loads(request.data.decode('utf-8'))
+    broker_url = data["broker_url"]
+    time = data["time"]
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future = executor.submit(broker.update_heartbeat, broker_url, time)
+        result = future.result()
+    return jsonify("Successfully added replica"), 200
 
 
 if __name__ == '__main__':

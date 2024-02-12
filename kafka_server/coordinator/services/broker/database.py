@@ -2,8 +2,8 @@ import requests
 import json
 
 
-def add_broker_to_database(broker_id,remote_addr):
-    data = json.dumps({"broker_id": broker_id, "remote_addr":remote_addr})
+def add_broker_to_database(broker_id, remote_addr):
+    data = json.dumps({"broker_id": broker_id, "remote_addr": remote_addr})
     r = requests.post('http://127.0.0.1:5001/broker/add', data=data)
     return r.status_code
 
@@ -29,4 +29,10 @@ def get_broker_replica_url(broker_id):
 def add_replica_for_broker(broker_id, replica):
     r = requests.post('http://127.0.0.1:5001/broker/add_replica',
                       data=json.dumps({"broker_id": broker_id, "replica": replica}))
+    return r.status_code
+
+
+def update_heartbeat_status(broker_id, time):
+    r = requests.post("http://127.0.0.1:5001/broker/add_heartbeat",
+                      data=json.dumps({"broker_url": broker_id, "time": f"{time}"}))
     return r.status_code

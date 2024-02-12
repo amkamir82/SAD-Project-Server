@@ -65,3 +65,24 @@ def add_replica_for_a_broker(broker_id, replica):
         json_data["replica"][broker_id] = replica
         f.write(json.dumps(json_data))
         f.close()
+
+
+def init_heartbeat_file():
+    path = f'./{config.BROKER_HEARTBEAT_DATABASE_FILE_PATH}'
+    check_file = os.path.isfile(path)
+    if not check_file:
+        with open(path, 'w') as f:
+            f.write(json.dumps({"brokers": {}}))
+
+
+def update_heartbeat(broker_url, time):
+    with lock:
+        init_heartbeat_file()
+        json_data = None
+        with open(config.BROKER_HEARTBEAT_DATABASE_FILE_PATH, 'r') as f:
+            json_data = json.load(f)
+            f.close()
+        with open(config.BROKER_HEARTBEAT_DATABASE_FILE_PATH, 'w') as f:
+            json_data["brokers"][broker_url] = time
+            f.write(json.dumps(json_data))
+            f.close()

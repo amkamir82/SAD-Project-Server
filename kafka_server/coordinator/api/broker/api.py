@@ -1,8 +1,9 @@
 from flask import Blueprint, jsonify, request
 import os
 import sys
-
+import json
 import random
+import datetime
 from coordinator.services.broker import database as broker_database
 
 COORDINATOR_PROJECT_PATH = os.getenv("COORDINATOR_PROJECT_PATH", "/app/")
@@ -43,3 +44,16 @@ def list_all_brokers():
         return jsonify("Error during getting list of brokers from database"), response_code
 
     return response_data, 200
+
+
+@api_blueprint.route('/heartbeat', methods=['POST'])
+def heartbeat():
+    data = json.loads(request.data.decode('utf-8'))
+    broker_addr = f'{data["ip"]}:{data["port"]}'
+    time = datetime.datetime.now().timestamp()
+
+    response_code = broker_database.update_heartbeat_status(broker_addr, time)
+    if response_code != 200:
+        return jsonify("Error during send broker heartbeat to database"), response_code
+
+    return jsonify("Broker heartbeat successfully updated"), 200

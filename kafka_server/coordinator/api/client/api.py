@@ -82,6 +82,6 @@ def heartbeat():
 
     response_code = client_database.update_heartbeat_status(client_addr, time)
     if response_code != 200:
-        return jsonify("Error during send heartbeat to database"), response_code
+        return jsonify("Error during send client heartbeat to database"), response_code
 
-    return jsonify("Heartbeat successfully updated"), 200
+    return jsonify("Client heartbeat successfully updated"), 200

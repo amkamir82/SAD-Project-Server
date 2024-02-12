@@ -37,7 +37,7 @@ def get_all_clients():
 
 
 def init_heartbeat_file():
-    path = f'./{config.HEARTBEAT_DATABASE_FILE_PATH}'
+    path = f'./{config.CLIENT_HEARTBEAT_DATABASE_FILE_PATH}'
     check_file = os.path.isfile(path)
     if not check_file:
         with open(path, 'w') as f:
@@ -48,10 +48,10 @@ def update_heartbeat(client_url, time):
     with lock:
         init_heartbeat_file()
         json_data = None
-        with open(config.HEARTBEAT_DATABASE_FILE_PATH, 'r') as f:
+        with open(config.CLIENT_HEARTBEAT_DATABASE_FILE_PATH, 'r') as f:
             json_data = json.load(f)
             f.close()
-        with open(config.HEARTBEAT_DATABASE_FILE_PATH, 'w') as f:
+        with open(config.CLIENT_HEARTBEAT_DATABASE_FILE_PATH, 'w') as f:
             json_data["clients"][client_url] = time
             f.write(json.dumps(json_data))
             f.close()
@@ -60,7 +60,7 @@ def update_heartbeat(client_url, time):
 def get_all_heartbeats():
     with lock:
         init_heartbeat_file()
-        with open(config.HEARTBEAT_DATABASE_FILE_PATH, 'r') as f:
+        with open(config.CLIENT_HEARTBEAT_DATABASE_FILE_PATH, 'r') as f:
             json_data = json.load(f)
 
     return json_data["clients"]
@@ -70,10 +70,10 @@ def delete_heartbeat(client_url):
     with lock:
         init_heartbeat_file()
         json_data = None
-        with open(config.HEARTBEAT_DATABASE_FILE_PATH, 'r') as f:
+        with open(config.CLIENT_HEARTBEAT_DATABASE_FILE_PATH, 'r') as f:
             json_data = json.load(f)
             f.close()
-        with open(config.HEARTBEAT_DATABASE_FILE_PATH, 'w') as f:
+        with open(config.CLIENT_HEARTBEAT_DATABASE_FILE_PATH, 'w') as f:
             del json_data["clients"][client_url]
             f.write(json.dumps(json_data))
             f.close()
