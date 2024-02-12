@@ -1,52 +1,67 @@
+from datetime import datetime, timedelta
 import json
 import os
+import time
+
 import requests
 import threading
 
 import sys
 
-
-BROKER_PROJECT_PATH=os.getenv("BROKER_PROJECT_PATH", "/app/")
+BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
 sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
-
 
 from file.hash import hash_md5
 from file.segment import Segment
-from manager.partition_manager import PartitionManager
+from manager.env import get_partition_count
 
 
 class Read(object):
     _instances_lock = threading.Lock()
     _read_lock = threading.Lock()
-    _instances = {}
+    _instance = None
 
-    def __new__(cls, partition: str, replica: str):
-        with cls._instances_lock:
-            if partition not in cls._instances:
-                cls._instances[partition] = super().__new__(cls)
-            return cls._instances[partition]
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            with cls._instances_lock:
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
+        return cls._instance
 
     def __init__(self, partition: str, replica: str):
         if not hasattr(self, 'initialized'):
             self.partition = partition
+            self.message_in_fly = False
+            self.message_in_fly_since = datetime.now()
             self.segment = Segment(partition, replica)
-            self.partitionManager = PartitionManager(partition)
             self.subscribers = self.get_subscribers()
             self.initialized = True
 
+            self.toggle_thread = threading.Thread(target=self.toggle_message_in_fly)
+            self.toggle_thread.daemon = True
+            self.toggle_thread.start()
+
+    def toggle_message_in_fly(self):
+        while True:
+            if self.message_in_fly and datetime.now() - self.message_in_fly_since > timedelta(seconds=2):
+                self.message_in_fly = False
+                self.save_message_in_fly()
+
+            time.sleep(5)
+
     def read_data(self):
+        self.load_message_in_fly()
+        print(self.message_in_fly, 'subscribe')
+        if self.message_in_fly:
+            print("there is message in fly", flush=True)
+            return None, None
+        if not self.check_data_exist():
+            return None, None
+
         with self._read_lock:
-            if self.segment.get_read_index() >= self.segment.get_write_index():
-                print("No key found")
-                return None, None
-
             key, value = self.segment.read()
-            if key is None:
-                print("No key found")
-                return None, None
-
             md5 = hash_md5(key)
-            partition_count = self.partitionManager.partition_count()
+            partition_count = get_partition_count()
             if int(md5, 16) % partition_count != int(self.partition) - 1:
                 self.segment.approve_reading()
                 return self.read_data()
@@ -58,11 +73,48 @@ class Read(object):
             return sent
 
     def pull_data(self):
-        pass
+        self.load_message_in_fly()
+        if self.message_in_fly:
+            print("there is message in fly")
+            return None, None
+        if not self.check_data_exist():
+            return None, None
+
+        with self._read_lock:
+            key, value = self.segment.read()
+
+            md5 = hash_md5(key)
+            partition_count = get_partition_count()
+            if int(md5, 16) % partition_count != int(self.partition) - 1:
+                self.segment.approve_reading()
+                return self.pull_data()
+
+            self.message_in_fly = True
+            self.save_message_in_fly()
+            return key, value
+
+    def ack_message(self):
+        if self.message_in_fly:
+            with self._read_lock:
+                self.segment.approve_reading()
+                self.message_in_fly = False
+                self.save_message_in_fly()
+
+    def check_data_exist(self):
+        if self.segment.get_read_index() >= self.segment.get_write_index():
+            print(f"No key found {self.segment.get_read_index()} in {self.segment.get_write_index()}")
+            return False
+
+        key, value = self.segment.read()
+        if key is None:
+            print("No key found")
+            return False
+
+        return True
 
     @staticmethod
     def get_subscribers():
-        subscriptions_file_path = os.path.join(os.getcwd(), '../data', 'subscriptions', 'subscribers.json')
+        subscriptions_file_path = os.path.join(os.getcwd(), 'data', 'subscriptions', 'subscribers.json')
 
         with open(subscriptions_file_path, 'r') as file:
             subscribers = json.load(file)
@@ -72,8 +124,9 @@ class Read(object):
         return subscribers
 
     def send_to_subscriber(self, key: str, value: str) -> bool:
-        chosen_subscriber = self.choose_subscriber()
-        url = f'{chosen_subscriber}/subscribe'
+        subscriber_id, chosen_subscriber = self.choose_subscriber()
+        url = f'{chosen_subscriber}/subscribe-{subscriber_id}'
+        print(f"Sending {key} to {url}", flush=True)
 
         try:
             response = requests.post(url, json={'key': key, 'value': value})
@@ -89,4 +142,23 @@ class Read(object):
         for i, key in enumerate(self.subscribers.keys()):
             id_to_key[i] = key
         chosen_key = id_to_key[read_index % subscriber_count]
-        return self.subscribers[chosen_key]
+        return chosen_key, self.subscribers[chosen_key]
+
+    def load_message_in_fly(self):
+        message_file_path = os.path.join(os.getcwd(), 'data', 'message_in_fly.json')
+        if os.path.exists(message_file_path):
+            with open(message_file_path, 'r') as file:
+                data = json.load(file)
+                print(data)
+                self.message_in_fly = data.get('message_in_fly', False)
+                self.message_in_fly_since = datetime.fromisoformat(
+                    data.get('message_in_fly_since', datetime.now().isoformat()))
+
+    def save_message_in_fly(self):
+        message_file_path = os.path.join(os.getcwd(), 'data', 'message_in_fly.json')
+        data = {
+            'message_in_fly': self.message_in_fly,
+            'message_in_fly_since': self.message_in_fly_since.isoformat()
+        }
+        with open(message_file_path, 'w+') as file:
+            json.dump(data, file)

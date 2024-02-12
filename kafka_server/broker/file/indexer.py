@@ -11,7 +11,7 @@ class Indexer(object):
     _read_lock = threading.Lock()
     _sync_lock = threading.Lock()
 
-    def __new__(cls, partition: str, replica: str):
+    def __new__(cls, partition: str, replica: str = None):
         with cls._lock:
             if partition not in cls._instances:
                 cls._instances[partition] = super().__new__(cls)
@@ -90,7 +90,7 @@ class Indexer(object):
         current_working_directory = os.getcwd()
         return os.path.join(
             current_working_directory,
-            '../data',
+            'data',
             'partition_index',
             f'{self.partition}',
             f'{action}_index'
@@ -100,7 +100,7 @@ class Indexer(object):
         current_working_directory = os.getcwd()
         return os.path.join(
             current_working_directory,
-            '../data',
+            'data',
             'partition_index',
             f'{self.partition}'
         )
@@ -109,5 +109,5 @@ class Indexer(object):
         url = f'{self.replica}/replica/index'
         data = {'partition': self.partition, 'read': self._read, 'sync': self._sync}
         response = requests.post(url, json=data)
-        if response.status_code == 200:
+        if response.status_code != 200:
             raise Exception(f'indexed not yet updated {response}')

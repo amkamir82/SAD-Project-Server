@@ -3,21 +3,20 @@ import requests
 import os
 import sys
 
-BROKER_PROJECT_PATH=os.getenv("BROKER_PROJECT_PATH", "/app/")
+BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
 sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
 
-
+from manager.env import get_partition_count
 
 from file.segment import Segment
 from file.hash import hash_md5
-from manager.partition_manager import PartitionManager
 
 
 class Write(object):
     _instances = {}
     _write_lock = threading.Lock()
 
-    def __new__(cls, partition: str, replica: str):
+    def __new__(cls, partition: str, replica: str = None):
         if partition not in cls._instances:
             cls._instances[partition] = super(Write, cls).__new__(cls)
         return cls._instances[partition]
@@ -29,15 +28,14 @@ class Write(object):
 
         self.partition = partition
         self.segment = Segment(partition, replica)
-        self.partitionManager = PartitionManager(partition)
         self.replica = replica
 
     def write_data(self, key: str, value: bytes):
         with self._write_lock:
             md5 = hash_md5(key)
-            partition_count = self.partitionManager.partition_count()
-            if int(md5, 16) % partition_count != int(self.partition) - 1:
-                raise Exception("key is not for this partition")
+            partition_count = get_partition_count()
+            if int(str(md5), 16) % partition_count != int(self.partition) - 1:
+                raise Exception(f"key is not for this partition, fuck {md5} {key}")
 
             appended = self.segment.append(key, value)
             if not appended:
@@ -56,5 +54,8 @@ class Write(object):
     def send_to_replica(self, key: str, value: bytes) -> bool:
         url = f'{self.replica}/replica/data'
         value_str = value.decode('utf-8')
-        response = requests.post(url, json={'key': key, 'value': value_str})
-        return response.status_code == 200
+        response = requests.post(url, json={'key': key, 'value': value_str, 'partition': self.partition})
+        if response.status_code != 200:
+            print(response, flush=True)
+            return False
+        return True

@@ -1,3 +1,6 @@
+import threading
+import time
+
 import schedule
 
 import sys, os
@@ -5,16 +8,21 @@ BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
 sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
 
 from file.read import Read
+from manager.env import *
 
-
+fetch_lock = threading.Lock()
 def read_sample_data():
-    partition = "3"
+    with fetch_lock:
+        read_instance = Read(get_primary_partition(), get_replica_url())
+        # print(id(read_instance))
+        # print(threading.currentThread().ident)
 
-    read_instance = Read(partition, 'http://localhost:5001')
-
-    print(read_instance.read_data())
-    # TODO: send to subscriber
+        print("reading sample data")
+        print(read_instance.read_data())
+        # TODO: send to subscriber
 
 
 def schedule_read():
-    job = schedule.every(5).seconds.do(read_sample_data)
+    while True:
+        read_sample_data()
+        time.sleep(1)
