@@ -108,3 +108,16 @@ def delete_heartbeat(client_url):
             del json_data["brokers"][client_url]
             f.write(json.dumps(json_data))
             f.close()
+
+
+def delete_broker(broker_id):
+    with lock:
+        init_brokers_file()
+        json_data = None
+        with open(config.BROKER_DATABASE_FILE_PATH, 'r') as f:
+            json_data = json.load(f)
+            f.close()
+        with open(config.BROKER_DATABASE_FILE_PATH, 'w') as f:
+            del json_data["brokers"][broker_id]
+            f.write(json.dumps(json_data))
+            f.close()
