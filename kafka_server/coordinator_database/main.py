@@ -84,5 +84,50 @@ def update_heartbeat():
     return jsonify("Successfully added replica"), 200
 
 
+@app.route('/client/list_all_heartbeats', methods=['GET'])
+def list_all_heartbeats():
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future = executor.submit(client.get_all_heartbeats)
+        result = future.result()
+    return jsonify(result), 200
+
+
+@app.route('/client/delete_heartbeat', methods=['POST'])
+def delete_heartbeat():
+    data = json.loads(request.data.decode('utf-8'))
+    client_url = data["client_url"]
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        try:
+            future = executor.submit(client.delete_heartbeat, client_url)
+            result = future.result()
+        except:
+            return jsonify("Error deleting subscription"), 500
+    return jsonify("Successfully "), 200
+
+
+@app.route('/subscribe/delete', methods=['POST'])
+def unsubscribe():
+    data = json.loads(request.data.decode('utf-8'))
+    client_url = data["client_url"]
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        try:
+            future = executor.submit(subscribe.delete_subscription, client_url)
+            result = future.result()
+        except:
+            return jsonify("Error deleting subscription"), 500
+    return jsonify("Successfully deleted "), 200
+
+
+@app.route('/subscribe/list_all', methods=['GET'])
+def get_all_subscriptions():
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        try:
+            future = executor.submit(subscribe.get_all_subscriptions)
+            result = future.result()
+        except:
+            return jsonify("Error deleting subscription"), 500
+    return jsonify(result), 200
+
+
 if __name__ == '__main__':
     app.run(port=5001, debug=True)
