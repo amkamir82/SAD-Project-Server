@@ -102,7 +102,7 @@ def delete_client_heartbeat():
             result = future.result()
         except:
             return jsonify("Error deleting subscription"), 500
-    return jsonify("Successfully "), 200
+    return jsonify("Successfully deleting client heartbeat"), 200
 
 
 @app.route('/subscribe/delete', methods=['POST'])
@@ -138,6 +138,27 @@ def update_broker_heartbeat():
         future = executor.submit(broker.update_heartbeat, broker_url, time)
         result = future.result()
     return jsonify("Successfully added replica"), 200
+
+
+@app.route('/broker/list_all_heartbeats', methods=['GET'])
+def list_all_broker_heartbeats():
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future = executor.submit(broker.get_all_heartbeats)
+        result = future.result()
+    return jsonify(result), 200
+
+
+@app.route('/broker/delete_heartbeat', methods=['POST'])
+def delete_broker_heartbeat():
+    data = json.loads(request.data.decode('utf-8'))
+    broker_url = data["broker_url"]
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        try:
+            future = executor.submit(broker.delete_heartbeat, broker_url)
+            result = future.result()
+        except:
+            return jsonify("Error deleting broker heartbeat"), 500
+    return jsonify("Successfully deleting broker heartbeat"), 200
 
 
 if __name__ == '__main__':
