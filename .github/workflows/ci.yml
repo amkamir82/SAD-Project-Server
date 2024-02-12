@@ -81,7 +81,7 @@ jobs:
   push-broker:
     name: Push Broker Image
     runs-on: ubuntu-latest
-    needs: build-docker
+    needs: build-broker
     
     steps:
       - name: Log into GitHub Container Registry
@@ -99,7 +99,7 @@ jobs:
   push-coordinator:
     name: Push Coorinator Image
     runs-on: ubuntu-latest
-    needs: build-docker
+    needs: build-coordinator
     
     steps:
       - name: Log into GitHub Container Registry
