@@ -56,8 +56,11 @@ def subscribe():
     if response_code != 200:
         return jsonify("Error during getting list of brokers from database"), response_code
 
-
-    selected_broker_id = random.choice(list(response_data.keys()))
+    min_length = 10000
+    selected_broker_id = None
+    for key in response_data.keys():
+        if len(response_data[key]) < min_length:
+            selected_broker_id = key
     broker_url = f"{selected_broker_id}:{response_data[selected_broker_id]}"
 
     tmp_dict = {}
