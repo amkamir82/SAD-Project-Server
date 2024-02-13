@@ -18,6 +18,7 @@ def send_subscribe_to_broker(broker_url, data):
 
 
 def update_clients_brokers_list():
+    print("updating clients")
     response_code, all_brokers = broker_database.list_all_brokers()
     if response_code != 200:
         raise Exception("Error during getting list of brokers from database")
@@ -27,7 +28,7 @@ def update_clients_brokers_list():
         raise Exception("Error during getting list of clients from database")
 
     for client_url in all_clients:
-        requests.post(f"http://{client_url}/broker-list", data=json.dumps({"broker_list": all_brokers}))
+        requests.post(f"{client_url}/update-brokers", data=json.dumps({"brokers": all_brokers}))
 
 
 def update_brokers_list(broker_url):
