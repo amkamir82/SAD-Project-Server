@@ -16,6 +16,7 @@ class Segment(object):
     _instances_lock = threading.Lock()
     _append_lock = threading.Lock()
     _read_lock = threading.Lock()
+    _sync_lock = threading.Lock()
 
     def __new__(cls, partition: str, replica: str):
         with cls._instances_lock:
@@ -62,6 +63,15 @@ class Segment(object):
                 self.indexer.inc_read()
         except Exception as e:
             print(f"Error inc read index: {e}")
+            return False
+        return True
+
+    def approve_sync(self):
+        try:
+            with self._sync_lock:
+                self.indexer.inc_sync()
+        except Exception as e:
+            print(f"Error inc sync index: {e}")
             return False
         return True
 
@@ -116,3 +126,6 @@ class Segment(object):
 
     def get_write_index(self) -> int:
         return self.indexer.get_write()
+
+    def get_sync_index(self) -> int:
+        return self.indexer.get_sync()

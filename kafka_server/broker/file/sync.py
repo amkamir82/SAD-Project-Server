@@ -1,7 +1,5 @@
-from datetime import datetime, timedelta
 import json
 import os
-import time
 
 import requests
 import threading
@@ -78,7 +76,7 @@ class Sync(object):
         return brokers
 
     def send_to_broker(self, key: str, value: str, broker_id: int) -> bool:
-        url = f'{self.brokers[broker_id]}/sync'
+        url = f'{self.brokers[broker_id]}/write'
         print(f"sync {key} to {url}", flush=True)
 
         try:
