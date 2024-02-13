@@ -1,32 +1,25 @@
 import os
 import sys
 import threading
-
-from prometheus_client import make_wsgi_app
+from main import init
+from file.indexer import Indexer
+from file.read import Read
+from file.write import Write
 from flask import Flask, request, jsonify
+from manager.env import get_primary_partition, get_replica_url
+from metrics import coordinator_write_requests, coordinator_replicate_index_requests
+from prometheus_client import make_wsgi_app
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 
 BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
 sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
 
 
-from file.indexer import Indexer
-from file.write import Write
-from file.read import Read
-from manager.env import *
-from metrics import (
-    coordinator_write_requests,
-    coordinator_replicate_index_requests,
-    coordinator_replicate_data_requests,
-    coordinator_subscribe_requests,
-)
-from werkzeug.middleware.dispatcher import DispatcherMiddleware
-
 app = Flask(__name__)
 app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
     '/metrics': make_wsgi_app()
 })
-
 
 
 @app.route('/')
@@ -124,12 +117,8 @@ def ack():
         return jsonify({'error': str(e)}), 500
 
 
-from main import init
 crun = threading.Thread(target=init)
 crun.daemon = True
 crun.start()
 
-app.run('0.0.0.0', port=5003, debug=True)
-# if __name__ == '__main__':
-#     pass
-
+app.run('0.0.0.0', port=5003)

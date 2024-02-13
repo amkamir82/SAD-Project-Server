@@ -2,16 +2,14 @@ import os
 import sys
 import threading
 
-BROKER_PROJECT_PATH=os.getenv("BROKER_PROJECT_PATH", "/app/")
-sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
-
-
 from file.indexer import Indexer
 
 SEGMENT_SIZE = 100
+BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
+sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
 
 
-class Segment(object):
+class Segment:
     _instances = {}
     _instances_lock = threading.Lock()
     _append_lock = threading.Lock()
@@ -81,7 +79,7 @@ class Segment(object):
 
         data_file_path = os.path.join(segment_path, f'{read_index}.dat')
 
-        if os.path.exists(data_file_path):  # todo: get lock
+        if os.path.exists(data_file_path):  # TODO: get lock
             try:
                 with open(data_file_path, 'rb') as entry_file:
                     data = entry_file.read()

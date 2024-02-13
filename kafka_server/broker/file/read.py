@@ -1,22 +1,22 @@
 from datetime import datetime, timedelta
 import json
 import os
+import sys
+import threading
 import time
 
 import requests
-import threading
-
-import sys
-
-BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
-sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
 
 from file.hash import hash_md5
 from file.segment import Segment
 from manager.env import get_partition_count
 
 
-class Read(object):
+BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
+sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
+
+
+class Read:
     _instances_lock = threading.Lock()
     _read_lock = threading.Lock()
     _instance = None
@@ -43,7 +43,8 @@ class Read(object):
 
     def toggle_message_in_fly(self):
         while True:
-            if self.message_in_fly and datetime.now() - self.message_in_fly_since > timedelta(seconds=2):
+            time_diff = datetime.now() - self.message_in_fly_since
+            if self.message_in_fly and time_diff > timedelta(seconds=2):
                 self.message_in_fly = False
                 self.save_message_in_fly()
 
@@ -108,10 +109,11 @@ class Read(object):
 
     def check_data_exist(self):
         if self.segment.get_read_index() >= self.segment.get_write_index():
-            print(f"No key found {self.segment.get_read_index()} in {self.segment.get_write_index()}")
+            print(f"No key found {self.segment.get_read_index()} "
+                  f"in {self.segment.get_write_index()}")
             return False
 
-        key, value = self.segment.read()
+        key, _ = self.segment.read()
         if key is None:
             print("No key found")
             return False
@@ -120,13 +122,19 @@ class Read(object):
 
     @staticmethod
     def get_subscribers():
-        subscriptions_file_path = os.path.join(os.getcwd(), 'data', 'subscriptions', 'subscribers.json')
+        subscriptions_file_path = os.path.join(
+            os.getcwd(),
+            'data',
+            'subscriptions',
+            'subscribers.json'
+        )
 
-        with open(subscriptions_file_path, 'r') as file:
-            subscribers = json.load(file)
+        with open(subscriptions_file_path, 'r', encoding='utf8') as f:
+            subscribers = json.load(f)
 
         if len(subscribers) == 0:
             raise Exception('No subscribers found')
+
         return subscribers
 
     def send_to_subscriber(self, key: str, value: str) -> bool:
@@ -135,7 +143,7 @@ class Read(object):
         print(f"Sending {key} to {url}", flush=True)
 
         try:
-            response = requests.post(url, json={'key': key, 'value': value})
+            response = requests.post(url, json={'key': key, 'value': value}, timeout=2)
             return response.status_code == 200
         except Exception as e:
             print(e)
@@ -153,8 +161,8 @@ class Read(object):
     def load_message_in_fly(self):
         message_file_path = os.path.join(os.getcwd(), 'data', 'message_in_fly.json')
         if os.path.exists(message_file_path):
-            with open(message_file_path, 'r') as file:
-                data = json.load(file)
+            with open(message_file_path, 'r', encoding='utf8') as f:
+                data = json.load(f)
                 print(data)
                 self.message_in_fly = data.get('message_in_fly', False)
                 self.message_in_fly_since = datetime.fromisoformat(
@@ -166,5 +174,5 @@ class Read(object):
             'message_in_fly': self.message_in_fly,
             'message_in_fly_since': self.message_in_fly_since.isoformat()
         }
-        with open(message_file_path, 'w+') as file:
-            json.dump(data, file)
+        with open(message_file_path, 'w+', encoding='utf8') as f:
+            json.dump(data, f)

@@ -1,4 +1,4 @@
-from prometheus_client import Counter, Gauge
+from prometheus_client import Counter
 
 coordinator_write_requests = Counter(
     'number_coordinator_write_requests',

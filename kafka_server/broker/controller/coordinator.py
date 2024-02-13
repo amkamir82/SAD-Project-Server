@@ -23,9 +23,8 @@ def _check_if_master_alive():
         response = requests.options(_master_coordinator_url(), timeout=1)
         if response.status_code == 200:
             return True
-        else:
-            print(f"Unexpected response: {response.status_code}")
-            return False
+        print(f"Unexpected response: {response.status_code}")
+        return False
     except requests.RequestException as e:
         print(f"Error checking heartbeat server: {e}")
 
@@ -39,10 +38,12 @@ def _post(data, url: str):
         print(f"master coordinator {_master_coordinator_url()} is not alive")
 
     try:
-        response = requests.post(coordinator, json=data)
+        response = requests.post(coordinator, json=data, timeout=2)
         return response.status_code == 200
     except requests.RequestException as e:
         print(f"Error on heartbeat {e}")
+
+    return False
 
 
 def heartbeat():

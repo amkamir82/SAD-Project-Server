@@ -1,19 +1,23 @@
+from datetime import datetime
+import json
 import threading
 import requests
-import json
-from datetime import datetime
+
 from coordinator.services.broker import database as broker_database
 from coordinator.services.client import database as client_database
 
 
 def get_all_subscriptions():
-    r = requests.get("http://127.0.0.1:5001/subscribe/list_all")
+    r = requests.get("http://127.0.0.1:5001/subscribe/list_all", timeout=2)
     return r.status_code, r.json()
 
 
 def send_subscribe_to_broker(broker_url, data):
-    r = requests.post(f"{broker_url}/subscription-plan",
-                      data=json.dumps({"subscription_plans": data}))
+    r = requests.post(
+        f"{broker_url}/subscription-plan",
+        data=json.dumps({"subscription_plans": data}),
+        timeout=2,
+    )
     return r.status_code
 
 
@@ -28,8 +32,11 @@ def update_new_broker():
         raise Exception("Error during getting list of clients from database")
 
     for client_url in all_clients:
-        requests.post(f"{client_url}/update-brokers", data=json.dumps({"brokers": all_brokers}),
-                      headers={"Content-Type": "application/json"})
+        requests.post(
+            f"{client_url}/update-brokers",
+            data=json.dumps({"brokers": all_brokers}),
+            timeout=2,
+        )
 
     for broker_id in all_brokers.keys():
         requests.post(f"{all_brokers[broker_id]}/update-brokers", data=json.dumps({"brokers": all_brokers}),
@@ -43,7 +50,11 @@ def update_brokers_list(broker_url):
     for broker_id in all_brokers.keys():
         data = all_brokers[broker_id]
         if broker_url == data:
-            response = requests.post(f"http://127.0.0.1/broker/delete", data=json.dumps({"broker_id": broker_id}))
+            response = requests.post(
+                "http://127.0.0.1/broker/delete",
+                data=json.dumps({"broker_id": broker_id}),
+                timeout=2,
+            )
             if response.status_code != 200:
                 print(f"Error during sending subscription to broker #{broker_url}")
 
@@ -51,7 +62,7 @@ def update_brokers_list(broker_url):
 
 
 def check_heartbeat():
-    response = requests.get('http://127.0.0.1:5001/broker/list_all_heartbeats')
+    response = requests.get('http://127.0.0.1:5001/broker/list_all_heartbeats', timeout=2)
     data = response.json()
 
     if len(data) == 0:
@@ -60,7 +71,11 @@ def check_heartbeat():
         datetime_seconds = float(data[key])
         diff_seconds = datetime.now().timestamp() - datetime_seconds
         if diff_seconds > 180:
-            requests.post("http://127.0.0.1:5001/broker/delete_heartbeat", data=json.dumps({"broker_url": key}))
+            requests.post(
+                "http://127.0.0.1:5001/broker/delete_heartbeat",
+                data=json.dumps({"broker_url": key}),
+                timeout=2,
+            )
             update_brokers_list(key)
 
 

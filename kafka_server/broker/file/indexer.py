@@ -1,10 +1,10 @@
 import json
 import os
-import requests
 import threading
+import requests
 
 
-class Indexer(object):
+class Indexer:
     _instances = {}
     _lock = threading.Lock()
     _write_lock = threading.Lock()
@@ -71,20 +71,19 @@ class Indexer(object):
 
     def _save_variable(self, value, action):
         file_path = self.__path(action)
-        with open(file_path, 'w+') as file:
+        with open(file_path, 'w+', encoding='utf8') as file:
             json.dump(value, file)
 
     def _load_variable(self, action):
         file_path = self.__path(action)
 
         if os.path.exists(file_path):
-            with open(file_path, 'r') as file:
+            with open(file_path, 'r', encoding='utf8') as file:
                 loaded_value = json.load(file)
-
             return loaded_value
-        else:
-            print(f'File {file_path} does not exist. Returning 0 for {action}')
-            return 0
+
+        print(f'File {file_path} does not exist. Returning 0 for {action}')
+        return 0
 
     def __path(self, action: str) -> str:
         current_working_directory = os.getcwd()
@@ -108,6 +107,6 @@ class Indexer(object):
     def send_to_replica(self):
         url = f'{self.replica}/replica/index'
         data = {'partition': self.partition, 'read': self._read, 'sync': self._sync}
-        response = requests.post(url, json=data)
+        response = requests.post(url, json=data, timeout=2)
         if response.status_code != 200:
             raise Exception(f'indexed not yet updated {response}')

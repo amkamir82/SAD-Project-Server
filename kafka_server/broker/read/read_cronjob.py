@@ -1,16 +1,15 @@
+import os
+import sys
 import threading
 import time
+from file.read import Read
+from manager.env import get_primary_partition, get_replica_url
 
-import schedule
-
-import sys, os
 BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
 sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
-
-from file.read import Read
-from manager.env import *
-
 fetch_lock = threading.Lock()
+
+
 def read_sample_data():
     with fetch_lock:
         read_instance = Read(get_primary_partition(), get_replica_url())
