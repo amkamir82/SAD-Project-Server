@@ -17,7 +17,7 @@ def send_subscribe_to_broker(broker_url, data):
     return r.status_code
 
 
-def update_clients_brokers_list():
+def update_new_broker():
     print("updating clients")
     response_code, all_brokers = broker_database.list_all_brokers()
     if response_code != 200:
@@ -29,6 +29,10 @@ def update_clients_brokers_list():
 
     for client_url in all_clients:
         requests.post(f"{client_url}/update-brokers", data=json.dumps({"brokers": all_brokers}),
+                      headers={"Content-Type": "application/json"})
+
+    for broker_id in all_brokers.keys():
+        requests.post(f"{all_brokers[broker_id]}/update-brokers", data=json.dumps({"brokers": all_brokers}),
                       headers={"Content-Type": "application/json"})
 
 
@@ -43,7 +47,7 @@ def update_brokers_list(broker_url):
             if response.status_code != 200:
                 print(f"Error during sending subscription to broker #{broker_url}")
 
-        update_clients_brokers_list()
+        update_new_broker()
 
 
 def check_heartbeat():
