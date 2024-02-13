@@ -6,6 +6,7 @@ import random
 import datetime
 from coordinator.services.broker import database as broker_database
 from coordinator.services.broker import subscribe as broker_subscriber_service
+from coordinator import config
 
 COORDINATOR_PROJECT_PATH = os.getenv("COORDINATOR_PROJECT_PATH", "/app/")
 sys.path.append(os.path.abspath(COORDINATOR_PROJECT_PATH))
@@ -22,23 +23,32 @@ def init_broker():
     if response_code != 200:
         return jsonify("Error during initializing broker"), response_code
 
-    response_code, all_brokers = broker_database.get_broker_replica_url(broker_id)
+    response_code, all_brokers = broker_database.list_all_brokers()
+    if response_code != 200:
+        return jsonify("Error during getting all brokers"), response_code
+
+    response_code, all_brokers_replicas = broker_database.get_broker_replica_url(broker_id)
     if response_code != 200:
         return jsonify("Error during initializing broker"), response_code
 
-    if len(all_brokers) > 1:
-        keys = all_brokers.keys()
-        key = random.choice(list(keys))
-        replica_url = all_brokers[key]
-        response_code = broker_database.add_replica_for_broker(broker_id, replica_url)
-        if response_code != 200:
-            return jsonify("Error during initializing broker"), response_code
-        return jsonify(replica_url), 200
+    # if len(all_brokers) > 1:
+    #     keys = all_brokers.keys()
+    #     key = random.choice(list(keys))
+    #     replica_url = all_brokers[key]
+    #     response_code = broker_database.add_replica_for_broker(broker_id, replica_url)
+    #     if response_code != 200:
+    #         return jsonify("Error during initializing broker"), response_code
+    #     return jsonify(replica_url), 200
 
-    replica = all_brokers
-
+    replica_url = all_brokers_replicas[broker_id]
+    partition_count = len(all_brokers)
+    master_coordinator_url = config.MASTER_COORDINATOR_URL
+    backup_coordinator_url = config.BACKUP_COORDINATOR_URL
+    #ToDo sync add broker
     broker_subscriber_service.update_clients_brokers_list()
-    return jsonify("Broker successfully initialized"), 200
+    return jsonify({"replica_url": replica_url, "partition_count": partition_count,
+                    "master_coordinator_url": master_coordinator_url,
+                    "replica_coordinator_url": backup_coordinator_url}), 200
 
 
 @api_blueprint.route('/list', methods=['GET'])
