@@ -14,7 +14,7 @@ def get_all_subscriptions():
 
 def send_subscribe_to_broker(broker_url, data):
     r = requests.post(
-        f"{broker_url}/subscription-plan",
+        f"{broker_url}/subscription/plan",
         data=json.dumps({"subscription_plans": data}),
         timeout=2,
     )
@@ -51,7 +51,7 @@ def update_brokers_list(broker_url):
         data = all_brokers[broker_id]
         if broker_url == data:
             response = requests.post(
-                "http://127.0.0.1/broker/delete",
+                "http://127.0.0.1:5001/broker/delete",
                 data=json.dumps({"broker_id": broker_id}),
                 timeout=2,
             )
@@ -70,7 +70,7 @@ def check_heartbeat():
     for key in data.keys():
         datetime_seconds = float(data[key])
         diff_seconds = datetime.now().timestamp() - datetime_seconds
-        if diff_seconds > 180:
+        if diff_seconds > 30:
             requests.post(
                 "http://127.0.0.1:5001/broker/delete_heartbeat",
                 data=json.dumps({"broker_url": key}),

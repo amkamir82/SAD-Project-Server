@@ -69,9 +69,9 @@ def subscribe():
         tmp_dict[broker_url].append([client_addr, random_id])
     else:
         tmp_dict[broker_url] = [[client_addr, random_id]]
-    # response_code = broker_subscribe_service.send_subscribe_to_broker(broker_url, tmp_dict)
-    # if response_code != 200:
-    #     return jsonify("Error during sending subscription to broker"), response_code
+    response_code = broker_subscribe_service.send_subscribe_to_broker(broker_url, tmp_dict)
+    if response_code != 200:
+        return jsonify("Error during sending subscription to broker"), response_code
 
     response_code = client_database.add_subscription_plan(broker_url, client_addr, random_id)
     if response_code != 200:

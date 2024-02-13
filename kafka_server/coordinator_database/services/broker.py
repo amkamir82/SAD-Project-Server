@@ -30,7 +30,7 @@ def add_broker(broker_id, remote_addr):
 def get_all_brokers():
     with lock:
         init_brokers_file()
-        with open(config.BROKER_DATABASE_FILE_PATH, 'r', 'utf8') as f:
+        with open(config.BROKER_DATABASE_FILE_PATH, 'r', encoding='utf8') as f:
             json_data = json.load(f)
 
     return json_data["brokers"]
