@@ -129,12 +129,11 @@ class Read:
             'subscribers.json'
         )
 
-        with open(subscriptions_file_path, 'r', encoding='utf8', encoding='utf8') as f:
+        with open(subscriptions_file_path, 'r', encoding='utf8') as f:
             subscribers = json.load(f)
 
         if len(subscribers) == 0:
             raise Exception('No subscribers found')
-
         return subscribers
 
     def send_to_subscriber(self, key: str, value: str) -> bool:
