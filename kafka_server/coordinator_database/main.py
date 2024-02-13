@@ -1,10 +1,13 @@
-from flask import Flask, request, jsonify
-import threading
 import concurrent.futures
+from logging import Logger
 import json
+import threading
+
+from flask import Flask, request, jsonify
 from coordinator_database.services import client, broker, subscribe
 
 app = Flask(__name__)
+logger = Logger(__name__)
 
 
 @app.route('/client/add', methods=['POST'])
@@ -66,7 +69,7 @@ def add_replica_for_a_broker():
     replica = data["replica"]
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future = executor.submit(broker.add_replica_for_a_broker, broker_id, replica)
-        result = future.result()
+        _ = future.result()
     return jsonify("Successfully added replica"), 200
 
 
@@ -77,8 +80,13 @@ def add_subscription_plan():
     client_url = data["client_url"]
     subscription_id = data["subscription_id"]
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        future = executor.submit(subscribe.add_subscription, broker_url, client_url, subscription_id)
-        result = future.result()
+        future = executor.submit(
+            subscribe.add_subscription,
+            broker_url,
+            client_url,
+            subscription_id,
+        )
+        _ = future.result()
     return jsonify("Successfully added replica"), 200
 
 
@@ -89,7 +97,7 @@ def update_client_heartbeat():
     time = data["time"]
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future = executor.submit(client.update_heartbeat, client_url, time)
-        result = future.result()
+        _ = future.result()
     return jsonify("Successfully added replica"), 200
 
 
@@ -108,8 +116,9 @@ def delete_client_heartbeat():
     with concurrent.futures.ThreadPoolExecutor() as executor:
         try:
             future = executor.submit(client.delete_heartbeat, client_url)
-            result = future.result()
-        except:
+            _ = future.result()
+        except Exception as e:
+            logger.error(e)
             return jsonify("Error deleting subscription"), 500
     return jsonify("Successfully deleting client heartbeat"), 200
 
@@ -121,8 +130,9 @@ def unsubscribe():
     with concurrent.futures.ThreadPoolExecutor() as executor:
         try:
             future = executor.submit(subscribe.delete_subscription, client_url)
-            result = future.result()
-        except:
+            _ = future.result()
+        except Exception as e:
+            logger.error(e)
             return jsonify("Error deleting subscription"), 500
     return jsonify("Successfully deleted "), 200
 
@@ -133,7 +143,8 @@ def get_all_subscriptions():
         try:
             future = executor.submit(subscribe.get_all_subscriptions)
             result = future.result()
-        except:
+        except Exception as e:
+            logger.error(e)
             return jsonify("Error deleting subscription"), 500
     return jsonify(result), 200
 
@@ -145,7 +156,7 @@ def update_broker_heartbeat():
     time = data["time"]
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future = executor.submit(broker.update_heartbeat, broker_url, time)
-        result = future.result()
+        _ = future.result()
     return jsonify("Successfully added replica"), 200
 
 
@@ -164,8 +175,9 @@ def delete_broker_heartbeat():
     with concurrent.futures.ThreadPoolExecutor() as executor:
         try:
             future = executor.submit(broker.delete_heartbeat, broker_url)
-            result = future.result()
-        except:
+            _ = future.result()
+        except Exception as e:
+            logger.error(e)
             return jsonify("Error deleting broker heartbeat"), 500
     return jsonify("Successfully deleting broker heartbeat"), 200
 

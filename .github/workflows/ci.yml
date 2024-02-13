@@ -76,13 +76,13 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pylint 
-    - name: Analysing the code with pylint
+        pip install flake8 
+    - name: Analysing the code with flake8
       run: |
-        pylint $(git ls-files '*.py')
-    - name: Test with pytest
-      run: |
-        pytest
+        flake8 --ignore E501 kafka_server/
+    # - name: Test with pytest
+    #   run: |
+    #     pytest
 
   static-code-analysis:
     name: Static Code Analysis

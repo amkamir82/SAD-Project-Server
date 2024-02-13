@@ -1,18 +1,16 @@
-import threading
-import requests
 import os
 import sys
+import threading
+import requests
+from file.hash import hash_md5
+from file.segment import Segment
+from manager.env import get_partition_count
 
 BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
 sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
 
-from manager.env import get_partition_count
 
-from file.segment import Segment
-from file.hash import hash_md5
-
-
-class Write(object):
+class Write:
     _instances = {}
     _write_lock = threading.Lock()
 
@@ -54,7 +52,12 @@ class Write(object):
     def send_to_replica(self, key: str, value: bytes) -> bool:
         url = f'{self.replica}/replica/data'
         value_str = value.decode('utf-8')
-        response = requests.post(url, json={'key': key, 'value': value_str, 'partition': self.partition})
+        response = requests.post(
+            url,
+            json={'key': key, 'value': value_str, 'partition': self.partition},
+            timeout=2,
+        )
+
         if response.status_code != 200:
             print(response, flush=True)
             return False

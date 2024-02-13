@@ -1,13 +1,13 @@
-import os
-import sys
-import random
 import datetime
-from flask import Blueprint, request, jsonify
+import json
+import os
+import random
+import sys
 
 from coordinator.services.broker import subscribe as broker_subscribe_service
 from coordinator.services.client import database as client_database
 from coordinator.services.broker import database as broker_database
-import json
+from flask import Blueprint, request, jsonify
 
 COORDINATOR_PROJECT_PATH = os.getenv("COORDINATOR_PROJECT_PATH", "/app/")
 sys.path.append(os.path.abspath(COORDINATOR_PROJECT_PATH))
@@ -17,7 +17,6 @@ api_blueprint = Blueprint('api', __name__)
 
 @api_blueprint.route('/init', methods=['POST'])
 def init_client():
-    r = request
     data = json.loads(request.data.decode('utf-8'))
     client_addr = f'http://{data["ip"]}:{data["port"]}'
 

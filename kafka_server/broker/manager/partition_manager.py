@@ -1,4 +1,4 @@
-class PartitionManager(object):
+class PartitionManager:
 
     def __init__(self, partition: str):
         self.partition = partition

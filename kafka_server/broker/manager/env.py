@@ -1,5 +1,6 @@
 import os
 
+
 def get_primary_partition() -> str:
     return os.getenv('PRIMARY_PARTITION', '2')
 

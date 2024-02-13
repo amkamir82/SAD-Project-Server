@@ -1,20 +1,19 @@
 import json
 import os
-
-import requests
-import threading
-
 import sys
-
-BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
-sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
+import threading
+import requests
 
 from file.hash import hash_md5
 from file.segment import Segment
 from manager.env import get_partition_count
 
 
-class Sync(object):
+BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
+sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
+
+
+class Sync:
     _instances_lock = threading.Lock()
     _sync_lock = threading.Lock()
     _instance = None
@@ -54,10 +53,11 @@ class Sync(object):
 
     def check_data_exist(self):
         if self.segment.get_sync_index() >= self.segment.get_write_index():
-            print(f"No key found {self.segment.get_sync_index()} in {self.segment.get_write_index()}")
+            print(f"No key found {self.segment.get_sync_index()} "
+                  "in {self.segment.get_write_index()}")
             return False
 
-        key, value = self.segment.read()
+        key, _ = self.segment.read()
         if key is None:
             print("No key found")
             return False
@@ -68,7 +68,7 @@ class Sync(object):
     def get_brokers():
         brokers_file_path = os.path.join(os.getcwd(), 'data', 'subscriptions', 'brokers.json')
 
-        with open(brokers_file_path, 'r') as file:
+        with open(brokers_file_path, 'r', encoding='utf8') as file:
             brokers = json.load(file)
 
         if len(brokers) == 0:
@@ -80,7 +80,7 @@ class Sync(object):
         print(f"sync {key} to {url}", flush=True)
 
         try:
-            response = requests.post(url, json={'key': key, 'value': value})
+            response = requests.post(url, json={'key': key, 'value': value}, timeout=2)
             return response.status_code == 200
         except Exception as e:
             print(e)
