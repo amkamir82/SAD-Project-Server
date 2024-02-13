@@ -28,7 +28,8 @@ def update_clients_brokers_list():
         raise Exception("Error during getting list of clients from database")
 
     for client_url in all_clients:
-        requests.post(f"{client_url}/update-brokers", data=json.dumps({"brokers": all_brokers}))
+        requests.post(f"{client_url}/update-brokers", data=json.dumps({"brokers": all_brokers}),
+                      headers={"Content-Type": "application/json"})
 
 
 def update_brokers_list(broker_url):
