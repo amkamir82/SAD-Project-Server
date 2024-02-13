@@ -26,4 +26,4 @@ if __name__ == '__main__':
     client_subscribe_service.run_check_heartbeat_job()
     # broker_subscribe_service.run_check_heartbeat_job()
 
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000)

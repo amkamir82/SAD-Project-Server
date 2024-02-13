@@ -30,7 +30,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./kafka_server/broker/
-          platforms: linux/amd64,linux/arm64
           push: true
           tags: mahdigheidi/sad-broker:latest
 
@@ -58,7 +57,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./kafka_server/coordinator/
-          platforms: linux/amd64,linux/arm64,linux/arm64/v8
           push: true
           tags: mahdigheidi/sad-coordinator:latest
 
