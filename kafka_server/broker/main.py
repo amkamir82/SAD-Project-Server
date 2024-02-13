@@ -1,11 +1,12 @@
-import os
-import sys
 import threading
 import schedule
+import os, sys
 
-from controller.coordinator import heartbeat
 from read.read_cronjob import schedule_read
+from read.replica_sync_cronjob import schedule_sync_replica
 from read.sync_cronjob import schedule_sync
+from controller.coordinator import heartbeat, init_from_coordinator
+
 
 BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
 sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
@@ -14,13 +15,22 @@ sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
 def schedule_read_thread():
     schedule_read()
 
-
 def schedule_sync_thread():
     schedule_sync()
 
-
 def send_heartbeat():
     heartbeat()
+
+def sync_replica():
+    schedule_sync_replica()
+
+
+def init_broker():
+    data = init_from_coordinator()
+    os.environ["REPLICA_URL"] = data['replica_url']
+    os.environ["MASTER_COORDINATOR_URL"] = data['master_coordinator_url']
+    os.environ["REPLICA_COORDINATOR_URL"] = data['replica_coordinator_url']
+    os.environ["PARTITION_COUNT"] = str(data['partition_count'])
 
 
 def init():

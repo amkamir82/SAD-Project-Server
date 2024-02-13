@@ -1,6 +1,11 @@
+import json
 import os
 import sys
 import threading
+
+BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
+sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
+
 from main import init
 from file.indexer import Indexer
 from file.read import Read
@@ -20,6 +25,7 @@ app = Flask(__name__)
 app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
     '/metrics': make_wsgi_app()
 })
+
 
 
 @app.route('/')
@@ -92,6 +98,67 @@ def replicate_index():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/subscription', methods=['POST'])
+def subscription():
+    try:
+        data = json.loads(request.data.decode("utf-8"))
+        brokers = data['brokers']
+
+        brokers_file_path = os.path.join(os.getcwd(), 'data', 'subscriptions', 'brokers.json')
+
+        with open(brokers_file_path, "w+") as file:
+            json.dump(brokers, file)
+
+        os.environ['PARTITION_COUNT'] = str(len(brokers))
+        indexer = Indexer(get_primary_partition(), get_replica_url())
+        indexer.update_read_sync(indexer.get_read(), indexer.get_read())
+
+        return jsonify({'status': 'Data written successfully.'}), 200
+
+    except Exception as e:
+        print(e)
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/subscribers', methods=['POST'])
+def subscribers():
+    try:
+        data = json.loads(request.data.decode("utf-8"))
+        brokers = data['subscribers']
+
+        subscribers_file_path = os.path.join(os.getcwd(), 'data', 'subscriptions', 'subscribers.json')
+
+        with open(subscribers_file_path, "w+") as file:
+            json.dump(brokers, file)
+
+        return jsonify({'status': 'Data written successfully.'}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/broker/down', methods=['POST'])
+def subscribers():
+    try:
+        data = json.loads(request.data.decode("utf-8"))
+        partition = data['partition']
+        os.environ['REPLICA_MIRROR_DOWN'] = str(partition)
+        return jsonify({'status': 'Data written successfully.'}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/replica/down', methods=['POST'])
+def subscribers():
+    try:
+        os.environ['REPLICA_URL'] = ''
+        return jsonify({'status': 'Data written successfully.'}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/pull', methods=['GET'])
 def pull():
     try:
@@ -121,4 +188,4 @@ crun = threading.Thread(target=init)
 crun.daemon = True
 crun.start()
 
-app.run('0.0.0.0', port=5003)
+app.run('0.0.0.0', port=5003, debug=True)
