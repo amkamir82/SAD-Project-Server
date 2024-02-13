@@ -18,7 +18,7 @@ app.register_blueprint(client_api, name="client_api", url_prefix='/client')
 app.register_blueprint(broker_api, name="broker_api", url_prefix='/broker')
 
 
-@app.route
+@app.route('/', methods=['GET'])
 def main_route():
     return jsonify("Welcome to SAD Project"), 200
 
