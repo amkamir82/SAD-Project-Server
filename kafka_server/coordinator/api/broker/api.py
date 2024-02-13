@@ -16,7 +16,7 @@ api_blueprint = Blueprint('api', __name__)
 @api_blueprint.route('/init', methods=['GET'])
 def init_broker():
     data = json.loads(request.data.decode('utf-8'))
-    broker_addr = f'{data["ip"]}:{data["port"]}'
+    broker_addr = f'http://{data["ip"]}:{data["port"]}'
     broker_id = data["broker_id"]
     response_code = broker_database.add_broker_to_database(broker_id, broker_addr)
     if response_code != 200:
@@ -53,7 +53,7 @@ def list_all_brokers():
 @api_blueprint.route('/heartbeat', methods=['POST'])
 def heartbeat():
     data = json.loads(request.data.decode('utf-8'))
-    broker_addr = f'{data["ip"]}:{data["port"]}'
+    broker_addr = f'http://{data["ip"]}:{data["port"]}'
     time = datetime.datetime.now().timestamp()
 
     response_code = broker_database.update_heartbeat_status(broker_addr, time)
