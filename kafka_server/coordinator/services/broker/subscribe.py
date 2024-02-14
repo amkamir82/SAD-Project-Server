@@ -79,10 +79,13 @@ def update_brokers_list(broker_url):
     print(all_brokers)
     if response_code != 200:
         raise Exception("Error during getting list of brokers from database")
+    down_broker_id = None
     for broker_id in all_brokers.keys():
         data = all_brokers[broker_id]
         print(data)
         if broker_url == data:
+            down_broker_id = broker_id
+            print("########################sending request")
             response = requests.post(
                 "http://127.0.0.1:5001/broker/delete",
                 data=json.dumps({"broker_id": broker_id}),
@@ -90,8 +93,8 @@ def update_brokers_list(broker_url):
             )
             if response.status_code != 200:
                 print(f"Error during sending subscription to broker #{broker_url}")
-        prepare_updating(all_brokers, broker_id, broker_url)
-        update_brokers_subscriptions()
+    prepare_updating(all_brokers, down_broker_id, broker_url)
+    update_brokers_subscriptions()
 
 
 def check_heartbeat():
@@ -103,7 +106,7 @@ def check_heartbeat():
     for key in data.keys():
         datetime_seconds = float(data[key])
         diff_seconds = datetime.now().timestamp() - datetime_seconds
-        if diff_seconds > 30:
+        if diff_seconds > 15:
             requests.post(
                 "http://127.0.0.1:5001/broker/delete_heartbeat",
                 data=json.dumps({"broker_url": key}),
