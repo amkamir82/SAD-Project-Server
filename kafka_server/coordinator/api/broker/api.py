@@ -4,13 +4,13 @@ import os
 import sys
 import random
 
-from coordinator.services.broker import subscribe as broker_subscriber_service
-from coordinator.services.broker import database as broker_database
-from coordinator import config
-from flask import Blueprint, jsonify, request
-
 COORDINATOR_PROJECT_PATH = os.getenv("COORDINATOR_PROJECT_PATH", "/app/")
 sys.path.append(os.path.abspath(COORDINATOR_PROJECT_PATH))
+from services.broker import subscribe as broker_subscriber_service
+from services.broker import database as broker_database
+import config
+from flask import Blueprint, jsonify, request
+
 
 api_blueprint = Blueprint('api', __name__)
 

@@ -1,10 +1,16 @@
 from datetime import datetime
 import json
 import threading
+import os
+import sys
 import requests
 
-from coordinator.services.broker import database as broker_database
-from coordinator.services.client import database as client_database
+COORDINATOR_PROJECT_PATH = os.getenv("COORDINATOR_PROJECT_PATH", "/app/")
+sys.path.append(os.path.abspath(COORDINATOR_PROJECT_PATH))
+
+
+from services.broker import database as broker_database
+from services.client import database as client_database
 
 
 def get_all_subscriptions():

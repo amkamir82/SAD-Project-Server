@@ -1,9 +1,14 @@
 from datetime import datetime
 import json
 import threading
+import os
+import sys
 import requests
 
-from coordinator.services.broker import subscribe as broker_subscribe_service
+COORDINATOR_PROJECT_PATH = os.getenv("COORDINATOR_PROJECT_PATH", "/app/")
+sys.path.append(os.path.abspath(COORDINATOR_PROJECT_PATH))
+
+from services.broker import subscribe as broker_subscribe_service
 
 
 def update_brokers_subscription_plan():
