@@ -17,9 +17,6 @@ class Indexer:
                 cls._instances[partition] = super().__new__(cls)
                 cls._instances[partition].partition = partition
                 cls._instances[partition].replica = replica
-                cls._instances[partition]._write = 0
-                cls._instances[partition]._read = 0
-                cls._instances[partition]._sync = 0
                 cls._instances[partition].load()
                 path = cls._instances[partition].__dir_path()
                 os.makedirs(path, exist_ok=True)
