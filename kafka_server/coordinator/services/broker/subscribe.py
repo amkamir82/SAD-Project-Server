@@ -22,7 +22,6 @@ def send_subscribe_to_broker(broker_url, data):
 
 
 def update_brokers_subscriptions():
-    print("updating clients")
     response_code, all_brokers = broker_database.list_all_brokers()
     if response_code != 200:
         raise Exception("Error during getting list of brokers from database")
@@ -31,6 +30,7 @@ def update_brokers_subscriptions():
     if response_code != 200:
         raise Exception("Error during getting list of clients from database")
 
+    print("updating clients")
     for client_url in all_clients:
         requests.post(
             f"{client_url}/subscription",
@@ -38,9 +38,10 @@ def update_brokers_subscriptions():
             timeout=2,
         )
 
+    print("updating brokers")
     for broker_id in all_brokers.keys():
         requests.post(f"{all_brokers[broker_id]}/subscription", data=json.dumps({"brokers": all_brokers}),
-                      headers={"Content-Type": "application/json"})
+                      headers={"Content-Type": "application/json"}, timeout=2)
 
 
 def prepare_updating(all_brokers, down_broker_id, down_broker_url):
