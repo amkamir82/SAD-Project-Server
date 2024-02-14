@@ -104,14 +104,15 @@ def subscription():
         data = json.loads(request.data.decode("utf-8"))
         brokers = data['brokers']
 
-        brokers_file_path = os.path.join(os.getcwd(), 'data', 'subscriptions', 'brokers.json')
+        brokers_file_path = os.path.join(os.getcwd(), '../data', 'subscriptions', 'brokers.json')
 
-        with open(brokers_file_path, "w+") as file:
+        with open(brokers_file_path, "w") as file:
             json.dump(brokers, file)
 
         os.environ['PARTITION_COUNT'] = str(len(brokers))
         indexer = Indexer(get_primary_partition(), get_replica_url())
         indexer.update_read_sync(indexer.get_read(), indexer.get_read())
+        print(brokers)
 
         return jsonify({'status': 'Data written successfully.'}), 200
 
