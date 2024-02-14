@@ -1,3 +1,4 @@
+import json
 import os
 
 
@@ -21,7 +22,12 @@ def get_replica_coordinator() -> str:
 
 
 def get_partition_count() -> int:
-    return int(os.getenv('PARTITION_COUNT', 3))
+    brokers_file_path = os.path.join(os.getcwd(), 'data', 'subscriptions', 'brokers.json')
+    if os.path.exists(brokers_file_path):
+        with open(brokers_file_path, 'r', encoding='utf8') as file:
+            brokers = json.load(file)
+        return len(brokers)
+    return 3
 
 
 def is_replica_mirror_down() -> bool:
