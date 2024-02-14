@@ -22,12 +22,13 @@ def update_brokers_subscription_plan():
 
 
 def check_heartbeat():
+    print("##############checing heartbeats")
     response = requests.get(
         'http://127.0.0.1:5001/client/list_all_heartbeats',
         timeout=2,
     )
     data = response.json()
-
+    print(data)
     if len(data) == 0:
         return
     for key in data.keys():
