@@ -51,19 +51,23 @@ def subscribe():
     if response_code != 200:
         return jsonify("Error during getting list of brokers from database"), response_code
 
-    response_code, response_data = broker_database.list_all_brokers()
+    response_code, all_brokers = broker_database.list_all_brokers()
     if response_code != 200:
         return jsonify("Error during getting list of brokers from database"), response_code
 
     min_length = 1000000
     selected_broker_id = None
-    for key in response_data.keys():
+
+    for key in all_brokers.keys():
+        if key not in all_subscriptions.keys():
+            selected_broker_id = key
+            break
         if len(all_subscriptions[key]) < min_length:
             min_length = len(all_subscriptions[key])
             selected_broker_id = key
 
-    broker_data = f"{selected_broker_id}:{response_data[selected_broker_id]}"
-    broker_url = response_data[selected_broker_id]
+    broker_data = f"{selected_broker_id}:{all_brokers[selected_broker_id]}"
+    broker_url = all_brokers[selected_broker_id]
 
     tmp_dict = {}
     if broker_data in all_subscriptions:
