@@ -30,6 +30,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./kafka_server/broker/
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: mahdigheidi/sad-broker:latest
 
@@ -57,6 +58,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./kafka_server/coordinator/
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: mahdigheidi/sad-coordinator:latest
 
@@ -120,10 +122,11 @@ jobs:
         known_hosts: ${{ secrets.SSH_HOST }}
     - name: connect and pull
       run: |
+        pwd
         ls
-        ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker-compose up -d broker-1 broker-2 broker-3 && exit"
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker-compose up -d broker-1 broker-2 broker-3 && exit"
     - name: cleanup
-      run: rm -rf ~/.ssh
+      run: rm ~/.ssh/id_rsa
 
   deploy-prod-coordinator:
     name: Deploy Coordinator to Production
@@ -142,6 +145,6 @@ jobs:
     - name: connect and pull
       run: |
         ls
-        ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker-compose up -d coordinator-1 coordinator-2 && exit"
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker-compose up -d coordinator-1 coordinator-2 && exit"
     - name: cleanup
-      run: rm -rf ~/.ssh
+      run: rm ~/.ssh/id_rsa
