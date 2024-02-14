@@ -51,6 +51,8 @@ def prepare_updating(all_brokers, down_broker_id, down_broker_url):
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
     for broker_id in all_brokers_replicas.keys():
         print("hi")
+        print("a ", all_brokers_replicas[broker_id])
+        print("b ", down_broker_url)
         if all_brokers_replicas[broker_id] == down_broker_url:
             print("hi2")
             update_replica_partition_of_a_broker_which_is_in_down_broker(all_brokers[broker_id])
