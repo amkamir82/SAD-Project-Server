@@ -30,7 +30,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./kafka_server/broker/
-          platforms: linux/amd64,linux/arm64
           push: true
           tags: mahdigheidi/sad-broker:latest
 
@@ -122,8 +121,6 @@ jobs:
         known_hosts: ${{ secrets.SSH_HOST }}
     - name: connect and pull
       run: |
-        pwd
-        ls
         ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker-compose up -d broker-1 broker-2 broker-3 && exit"
     - name: cleanup
       run: rm ~/.ssh/id_rsa
