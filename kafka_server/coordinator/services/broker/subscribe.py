@@ -69,7 +69,7 @@ def prepare_updating(all_brokers, down_broker_id, down_broker_url):
 
 def update_replica_partition_of_a_broker_which_is_in_down_broker(broker_url):
     print(f"###############sedning request to {broker_url} to aware its replica")
-    r = requests.get(f"{broker_url}/replica/down", timeout=2)
+    r = requests.post(f"{broker_url}/replica/down", timeout=2)
     print(r.status_code)
     if r.status_code != 200:
         raise Exception("Error in sending request to broker to tell it its replica is down")
