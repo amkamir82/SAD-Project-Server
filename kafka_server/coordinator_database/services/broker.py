@@ -43,9 +43,7 @@ def init_brokers_replicas_file():
         with open(path, 'w', encoding='utf8') as f:
             replicas = {
                 "replica": {
-                    "1": "http://127.0.0.1:8001",
-                    "2": "http://127.0.0.1:8002",
-                    "3": "http://127.0.0.1:8003",
+                    "1": "http://185.226.116.193:5003"
                 }
             }
             f.write(json.dumps(replicas))
