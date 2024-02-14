@@ -138,7 +138,7 @@ def subscribers():
 
 
 @app.route('/broker/down', methods=['POST'])
-def subscribers():
+def broker_down():
     try:
         data = json.loads(request.data.decode("utf-8"))
         partition = data['partition']
@@ -150,7 +150,7 @@ def subscribers():
 
 
 @app.route('/replica/down', methods=['POST'])
-def subscribers():
+def replica_down():
     try:
         os.environ['REPLICA_URL'] = ''
         return jsonify({'status': 'Data written successfully.'}), 200

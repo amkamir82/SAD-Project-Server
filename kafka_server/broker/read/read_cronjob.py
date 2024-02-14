@@ -21,4 +21,4 @@ def read_sample_data():
 def schedule_read():
     while True:
         read_sample_data()
-        time.sleep(1)
+        time.sleep(5)

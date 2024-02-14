@@ -52,7 +52,6 @@ class Read:
 
     def read_data(self):
         self.load_message_in_fly()
-        print(self.message_in_fly, 'subscribe')
         if self.message_in_fly:
             print("there is message in fly", flush=True)
             return None, None
@@ -124,7 +123,7 @@ class Read:
     def get_subscribers():
         subscriptions_file_path = os.path.join(
             os.getcwd(),
-            'data',
+            '../data',
             'subscriptions',
             'subscribers.json'
         )

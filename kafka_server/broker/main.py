@@ -34,6 +34,7 @@ def init_broker():
 
 
 def init():
+    init_broker()
     read_thread = threading.Thread(target=schedule_read_thread)
     read_thread.daemon = True
     read_thread.start()
@@ -42,8 +43,8 @@ def init():
     heartbeat_thread.daemon = True
     heartbeat_thread.start()
 
-    sync_thread = threading.Thread(target=schedule_sync_thread)
-    sync_thread.daemon = True
-    sync_thread.start()
+    # sync_thread = threading.Thread(target=schedule_sync_thread)
+    # sync_thread.daemon = True
+    # sync_thread.start()
 
     schedule.run_pending()
