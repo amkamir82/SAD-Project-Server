@@ -38,10 +38,10 @@ def init_broker():
 
 
 def init():
-    os.makedirs(os.path.join(os.getcwd(), '../data'), exist_ok=True)
-    os.makedirs(os.path.join(os.getcwd(), '../data', 'subscriptions'), exist_ok=True)
-    os.makedirs(os.path.join(os.getcwd(), '../data', 'partition_data'), exist_ok=True)
-    os.makedirs(os.path.join(os.getcwd(), '../data', 'partition_index'), exist_ok=True)
+    os.makedirs(os.path.join(os.getcwd(), 'data'), exist_ok=True)
+    os.makedirs(os.path.join(os.getcwd(), 'data', 'subscriptions'), exist_ok=True)
+    os.makedirs(os.path.join(os.getcwd(), 'data', 'partition_data'), exist_ok=True)
+    os.makedirs(os.path.join(os.getcwd(), 'data', 'partition_index'), exist_ok=True)
     init_broker()
     read_thread = threading.Thread(target=schedule_read_thread)
     read_thread.daemon = True
