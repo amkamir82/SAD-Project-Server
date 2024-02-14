@@ -61,22 +61,23 @@ def prepare_updating(all_brokers, down_broker_id, down_broker_url):
 
 
 def update_replica_partition_of_a_broker_which_is_in_down_broker(broker_url):
+    print(f"###############sedning request to {broker_url} to aware its replica")
     r = requests.get(f"{broker_url}/replica/down", timeout=2)
+    print(r.status_code)
     if r.status_code != 200:
         raise Exception("Error in sending request to broker to tell it its replica is down")
 
 
 def update_replica_partition_of_a_down_broker(down_broker_id, down_broker_replica_url):
+    print(f"###############sedning request to sync replica of down broker# {down_broker_id}:{down_broker_replica_url}")
     r = requests.post(f"{down_broker_replica_url}/broker/down", data=json.dumps({"partition": down_broker_id}))
+    print(r.status_code)
     if r.status_code != 200:
         raise Exception("Error in sending request to broker which has the replica of a down broker")
 
 
 def update_brokers_list(broker_url):
-    print("===========================")
-    print(broker_url)
     response_code, all_brokers = broker_database.list_all_brokers()
-    print(all_brokers)
     if response_code != 200:
         raise Exception("Error during getting list of brokers from database")
     down_broker_id = None
@@ -85,7 +86,7 @@ def update_brokers_list(broker_url):
         print(data)
         if broker_url == data:
             down_broker_id = broker_id
-            print("########################sending request")
+            print(f"########################sending request tp delete broker {broker_id}:{broker_url}")
             response = requests.post(
                 "http://127.0.0.1:5001/broker/delete",
                 data=json.dumps({"broker_id": broker_id}),
