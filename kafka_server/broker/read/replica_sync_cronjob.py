@@ -4,7 +4,7 @@ import threading
 import time
 
 from file.sync import Sync
-from manager.env import get_primary_partition, get_replica_url, is_replica_mirror_down, get_replica_mirror_down_partition
+from manager.env import is_replica_mirror_down, get_replica_mirror_down_partition
 
 BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
 sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
