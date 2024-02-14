@@ -126,7 +126,7 @@ def subscribers():
         data = json.loads(request.data.decode("utf-8"))
         brokers = data['subscribers']
 
-        subscribers_file_path = os.path.join(os.getcwd(), 'data', 'subscriptions', 'subscribers.json')
+        subscribers_file_path = os.path.join(os.getcwd(), '../data', 'subscriptions', 'subscribers.json')
 
         with open(subscribers_file_path, "w+") as file:
             json.dump(brokers, file)
