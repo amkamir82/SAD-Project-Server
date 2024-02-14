@@ -43,11 +43,7 @@ def update_brokers_subscriptions():
                       headers={"Content-Type": "application/json"})
 
 
-def prepare_updating(down_broker_id, down_broker_url):
-    response_code, all_brokers = broker_database.list_all_brokers()
-    if response_code != 200:
-        raise Exception("Error during getting list of brokers")
-
+def prepare_updating(all_brokers, down_broker_id, down_broker_url):
     response_code, all_brokers_replicas = broker_database.list_of_replicas()
     if response_code != 200:
         raise Exception("Error during getting list of brokers replicas")
@@ -91,7 +87,7 @@ def update_brokers_list(broker_url):
             )
             if response.status_code != 200:
                 print(f"Error during sending subscription to broker #{broker_url}")
-        prepare_updating(broker_id, broker_url)
+        prepare_updating(all_brokers, broker_id, broker_url)
         update_brokers_subscriptions()
 
 
