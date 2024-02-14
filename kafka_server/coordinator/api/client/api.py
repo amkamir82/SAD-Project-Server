@@ -61,7 +61,7 @@ def subscribe():
         if len(response_data[key]) < min_length:
             selected_broker_id = key
     broker_data = f"{selected_broker_id}:{response_data[selected_broker_id]}"
-    broker_url = {response_data[selected_broker_id]}
+    broker_url = response_data[selected_broker_id]
 
     tmp_dict = {}
     if broker_data in all_subscriptions:
