@@ -165,7 +165,6 @@ class Read:
         if os.path.exists(message_file_path):
             with open(message_file_path, 'r', encoding='utf8') as f:
                 data = json.load(f)
-                print(data)
                 self.message_in_fly = data.get('message_in_fly', False)
                 self.message_in_fly_since = datetime.fromisoformat(
                     data.get('message_in_fly_since', datetime.now().isoformat()))
