@@ -62,11 +62,13 @@ def subscribe():
         print(key)
         print(all_brokers)
         print(all_subscriptions)
-        if key not in all_subscriptions.keys():
+        if f"{key}:{all_brokers[key]}" not in all_subscriptions.keys():
+            print("check by first if")
             selected_broker_id = key
             break
-        if len(all_subscriptions[key]) < min_length:
-            min_length = len(all_subscriptions[key])
+        if len(all_subscriptions[f"{key}:{all_brokers[key]}"]) < min_length:
+            print("check by second if")
+            min_length = len(all_subscriptions[f"{key}:{all_brokers[key]}"])
             selected_broker_id = key
 
     broker_data = f"{selected_broker_id}:{all_brokers[selected_broker_id]}"
