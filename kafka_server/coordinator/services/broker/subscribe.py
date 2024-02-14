@@ -93,7 +93,11 @@ def update_replica_partition_of_a_broker_which_is_in_down_broker(broker_url):
 
 def update_replica_partition_of_a_down_broker(down_broker_id, down_broker_replica_url):
     print(f"###############sedning request to sync replica of down broker# {down_broker_id}:{down_broker_replica_url}")
-    r = requests.post(f"{down_broker_replica_url}/broker/down", data=json.dumps({"partition": down_broker_id}))
+    r = requests.post(
+        f"{down_broker_replica_url}/broker/down",
+        data=json.dumps({"partition": down_broker_id}),
+        timeout=2,
+    )
     print(r.status_code)
     if r.status_code != 200:
         raise Exception("Error in sending request to broker which has the replica of a down broker")

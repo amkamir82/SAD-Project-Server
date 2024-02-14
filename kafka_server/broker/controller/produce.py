@@ -182,4 +182,5 @@ crun = threading.Thread(target=init)
 crun.daemon = True
 crun.start()
 
-app.run('0.0.0.0', port=5003, debug=True)
+broker_listening_addr = '0.0.0.0'
+app.run(broker_listening_addr, port=5003)

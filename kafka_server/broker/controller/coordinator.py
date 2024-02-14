@@ -42,7 +42,7 @@ def _post(data, url: str):
         print(f"master coordinator {_master_coordinator_url()} is not alive")
 
     try:
-        response = requests.post(coordinator, json=data, data=json.dumps(data))
+        response = requests.post(coordinator, json=data, data=json.dumps(data), timeout=2)
         return response.status_code == 200
     except requests.RequestException as e:
         print(f"Error on post {e}")
@@ -55,7 +55,7 @@ def _get(data, url: str):
             coordinator = _url(master_not_replica=master_alive, url=url)
             if not master_alive:
                 print(f"master coordinator {_master_coordinator_url()} is not alive")
-            response = requests.get(coordinator, json=data, data=json.dumps(data))
+            response = requests.get(coordinator, json=data, data=json.dumps(data), timeout=2)
             if response.status_code == 200:
                 return json.loads(response.content.decode("utf-8"))
         except requests.RequestException as e:
