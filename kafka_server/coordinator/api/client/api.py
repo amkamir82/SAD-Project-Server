@@ -60,16 +60,16 @@ def subscribe():
     for key in response_data.keys():
         if len(response_data[key]) < min_length:
             selected_broker_id = key
+
     broker_data = f"{selected_broker_id}:{response_data[selected_broker_id]}"
     broker_url = response_data[selected_broker_id]
 
     tmp_dict = {}
     if broker_data in all_subscriptions:
-        tmp_dict[broker_data] = []
-        tmp_dict[broker_data].append(all_subscriptions[broker_data])
-        tmp_dict[broker_data].append([client_addr, random_id])
+        for subs in all_subscriptions[broker_data]:
+            tmp_dict[subs[1]] = subs[0]
     else:
-        tmp_dict[broker_data] = [[client_addr, random_id]]
+        tmp_dict[random_id] = client_addr
     response_code = broker_subscribe_service.send_subscribe_to_broker(broker_url, tmp_dict)
     if response_code != 200:
         return jsonify("Error during sending subscription to broker"), response_code
