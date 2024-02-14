@@ -120,6 +120,7 @@ jobs:
         known_hosts: ${{ secrets.SSH_HOST }}
     - name: connect and pull
       run: |
+        ls
         ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker-compose up -d broker-1 broker-2 broker-3 && exit"
     - name: cleanup
       run: rm -rf ~/.ssh
@@ -140,6 +141,7 @@ jobs:
         known_hosts: ${{ secrets.SSH_HOST }}
     - name: connect and pull
       run: |
+        ls
         ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker-compose up -d coordinator-1 coordinator-2 && exit"
     - name: cleanup
       run: rm -rf ~/.ssh
