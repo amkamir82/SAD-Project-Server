@@ -1,3 +1,4 @@
+import json
 import os
 import time
 import psutil
@@ -20,7 +21,7 @@ def _url(master_not_replica: bool, url: str) -> str:
 
 def _check_if_master_alive():
     try:
-        response = requests.options(_master_coordinator_url(), timeout=1)
+        response = requests.get(_master_coordinator_url(), timeout=1)
         if response.status_code == 200:
             return True
         print(f"Unexpected response: {response.status_code}")
@@ -38,10 +39,24 @@ def _post(data, url: str):
         print(f"master coordinator {_master_coordinator_url()} is not alive")
 
     try:
-        response = requests.post(coordinator, json=data, timeout=2)
+        response = requests.post(coordinator, json=data, data=json.dumps(data))
         return response.status_code == 200
     except requests.RequestException as e:
-        print(f"Error on heartbeat {e}")
+        print(f"Error on post {e}")
+
+
+def _get(data, url: str):
+    for i in range(3):
+        try:
+            master_alive = _check_if_master_alive()
+            coordinator = _url(master_not_replica=master_alive, url=url)
+            if not master_alive:
+                print(f"master coordinator {_master_coordinator_url()} is not alive")
+            response = requests.get(coordinator, json=data, data=json.dumps(data))
+            if response.status_code == 200:
+                return json.loads(response.content.decode("utf-8"))
+        except requests.RequestException as e:
+            print(f"Error on {i}")
 
     return False
 
@@ -55,7 +70,9 @@ def heartbeat():
 
         payload = {
             'cpu_usage': cpu_usage,
-            'disk_usage': disk_usage
+            'disk_usage': disk_usage,
+            'ip': os.getenv("IP"),
+            'port': os.getenv("PORT"),
         }
 
         if _post(payload, heartbeat_url):
@@ -64,3 +81,18 @@ def heartbeat():
             print("Heartbeat Failed")
 
         time.sleep(3)  # 3 Seconds wait for another heartbeat
+
+
+def init_from_coordinator():
+    init_url = 'broker/init'
+
+    partition = os.getenv("PRIMARY_PARTITION")
+    port = os.getenv("PORT")
+
+    payload = {
+        'broker_id': partition,
+        'port': port,
+        'ip': os.getenv("IP")
+    }
+
+    return _get(data=payload, url=init_url)

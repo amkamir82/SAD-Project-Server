@@ -105,6 +105,8 @@ class Indexer:
         )
 
     def send_to_replica(self):
+        if self.replica is None:
+            return
         url = f'{self.replica}/replica/index'
         data = {'partition': self.partition, 'read': self._read, 'sync': self._sync}
         response = requests.post(url, json=data, timeout=2)

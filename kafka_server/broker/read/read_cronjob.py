@@ -13,12 +13,9 @@ fetch_lock = threading.Lock()
 def read_sample_data():
     with fetch_lock:
         read_instance = Read(get_primary_partition(), get_replica_url())
-        # print(id(read_instance))
-        # print(threading.currentThread().ident)
 
         print("reading sample data")
         print(read_instance.read_data())
-        # TODO: send to subscriber
 
 
 def schedule_read():
