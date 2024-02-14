@@ -34,6 +34,18 @@ def get_broker_replica_url(broker_id):
     return r.status_code, response_data
 
 
+def list_of_replicas():
+    r = requests.get(
+        'http://127.0.0.1:5001/broker/list_of_replicas',
+        timeout=2,
+    )
+    if r.status_code != 200:
+        return r.status_code, None
+
+    response_data = json.loads(r.content.decode('utf-8'))
+    return r.status_code, response_data
+
+
 def add_replica_for_broker(broker_id, replica):
     r = requests.post(
         'http://127.0.0.1:5001/broker/add_replica',

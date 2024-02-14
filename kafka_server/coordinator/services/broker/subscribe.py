@@ -14,14 +14,14 @@ def get_all_subscriptions():
 
 def send_subscribe_to_broker(broker_url, data):
     r = requests.post(
-        f"{broker_url}/subscription/plan",
-        data=json.dumps({"subscription_plans": data}),
+        f"{broker_url}/subscribers",
+        data=json.dumps({"subscribers": data}),
         timeout=2,
     )
     return r.status_code
 
 
-def update_new_broker():
+def update_brokers_subscriptions():
     print("updating clients")
     response_code, all_brokers = broker_database.list_all_brokers()
     if response_code != 200:
@@ -33,7 +33,7 @@ def update_new_broker():
 
     for client_url in all_clients:
         requests.post(
-            f"{client_url}/update-brokers",
+            f"{client_url}/subscription",
             data=json.dumps({"brokers": all_brokers}),
             timeout=2,
         )
@@ -41,6 +41,40 @@ def update_new_broker():
     for broker_id in all_brokers.keys():
         requests.post(f"{all_brokers[broker_id]}/update-brokers", data=json.dumps({"brokers": all_brokers}),
                       headers={"Content-Type": "application/json"})
+
+
+def prepare_updating(down_broker_id, down_broker_url):
+    response_code, all_brokers = broker_database.list_all_brokers()
+    if response_code != 200:
+        raise Exception("Error during getting list of brokers")
+
+    response_code, all_brokers_replicas = broker_database.list_of_replicas()
+    if response_code != 200:
+        raise Exception("Error during getting list of brokers replicas")
+
+    # find replica of a broker which is on down broker
+    for broker_id in all_brokers_replicas.keys():
+        if all_brokers_replicas[broker_id] == down_broker_url:
+            update_replica_partition_of_a_broker_which_is_in_down_broker(all_brokers[broker_id])
+
+    # update all brokers
+    update_brokers_subscriptions()
+
+    # find replica of down broker
+    down_broker_replica_url = all_brokers_replicas[down_broker_id]
+    update_replica_partition_of_a_down_broker(down_broker_id, down_broker_replica_url)
+
+
+def update_replica_partition_of_a_broker_which_is_in_down_broker(broker_url):
+    r = requests.get(f"{broker_url}/replica/down", timeout=2)
+    if r.status_code != 200:
+        raise Exception("Error in sending request to broker to tell it its replica is down")
+
+
+def update_replica_partition_of_a_down_broker(down_broker_id, down_broker_replica_url):
+    r = requests.post(f"{down_broker_replica_url}/broker/down", data=json.dumps({"partition": down_broker_id}))
+    if r.status_code != 200:
+        raise Exception("Error in sending request to broker which has the replica of a down broker")
 
 
 def update_brokers_list(broker_url):
@@ -57,8 +91,8 @@ def update_brokers_list(broker_url):
             )
             if response.status_code != 200:
                 print(f"Error during sending subscription to broker #{broker_url}")
-
-        update_new_broker()
+        prepare_updating(broker_id, broker_url)
+        update_brokers_subscriptions()
 
 
 def check_heartbeat():

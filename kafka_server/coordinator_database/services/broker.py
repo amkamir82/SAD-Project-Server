@@ -127,3 +127,11 @@ def delete_broker(broker_id):
             del json_data["brokers"][broker_id]
             f.write(json.dumps(json_data))
             f.close()
+
+
+def list_of_replicas():
+    init_brokers_replicas_file()
+    with open(config.BROKER_REPLICA_FILE_PATH, 'r', encoding='utf8') as f:
+        json_data = json.load(f)
+        f.close()
+        return json_data["replica"]
