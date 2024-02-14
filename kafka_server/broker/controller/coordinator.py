@@ -78,12 +78,7 @@ def heartbeat():
             'ip': os.getenv("IP"),
             'port': os.getenv("PORT"),
         }
-
-        if _post(payload, heartbeat_url):
-            print(f"Heartbeat {payload}")
-        else:
-            print("Heartbeat Failed")
-
+        _post(payload, heartbeat_url)
         time.sleep(3)  # 3 Seconds wait for another heartbeat
 
 
