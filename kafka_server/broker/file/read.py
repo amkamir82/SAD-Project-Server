@@ -125,7 +125,7 @@ class Read:
     def get_subscribers():
         subscriptions_file_path = os.path.join(
             os.getcwd(),
-            '../data',
+            'data',
             'subscriptions',
             'subscribers.json'
         )
