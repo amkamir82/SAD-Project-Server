@@ -51,6 +51,8 @@ class Read:
             time.sleep(5)
 
     def read_data(self):
+        if len(self.subscribers) == 0:
+            return None, None
         self.load_message_in_fly()
         if self.message_in_fly:
             print("there is message in fly", flush=True)
@@ -127,6 +129,8 @@ class Read:
             'subscriptions',
             'subscribers.json'
         )
+        if not os.path.exists(subscriptions_file_path):
+            return []
 
         with open(subscriptions_file_path, 'r', encoding='utf8') as f:
             subscribers = json.load(f)
