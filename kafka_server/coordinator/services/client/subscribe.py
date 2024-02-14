@@ -34,11 +34,14 @@ def check_heartbeat():
         datetime_seconds = float(data[key])
         diff_seconds = datetime.now().timestamp() - datetime_seconds
         if diff_seconds > 30:
+            print("##############delete client heartbeat")
             requests.post(
                 "http://127.0.0.1:5001/client/delete_heartbeat",
                 data=json.dumps({"client_url": key}),
                 timeout=2,
             )
+
+            print("##############delete all subscriptions for client")
             requests.post(
                 "http://127.0.0.1:5001/subscribe/delete",
                 data=json.dumps({"client_url": key}),
