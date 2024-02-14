@@ -58,8 +58,8 @@ def subscribe():
     min_length = 1000000
     selected_broker_id = None
     for key in response_data.keys():
-        if len(response_data[key]) < min_length:
-            min_length = len(response_data[key])
+        if len(all_subscriptions[key]) < min_length:
+            min_length = len(all_subscriptions[key])
             selected_broker_id = key
 
     broker_data = f"{selected_broker_id}:{response_data[selected_broker_id]}"
