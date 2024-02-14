@@ -73,11 +73,15 @@ def update_replica_partition_of_a_down_broker(down_broker_id, down_broker_replic
 
 
 def update_brokers_list(broker_url):
+    print("===========================")
+    print(broker_url)
     response_code, all_brokers = broker_database.list_all_brokers()
+    print(all_brokers)
     if response_code != 200:
         raise Exception("Error during getting list of brokers from database")
     for broker_id in all_brokers.keys():
         data = all_brokers[broker_id]
+        print(data)
         if broker_url == data:
             response = requests.post(
                 "http://127.0.0.1:5001/broker/delete",

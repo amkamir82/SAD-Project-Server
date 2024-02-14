@@ -48,9 +48,10 @@ def list_brokers():
 def delete_broker():
     data = json.loads(request.data.decode('utf-8'))
     broker_id = data['broker_id']
-    thread = threading.Thread(target=broker.delete_broker, args=(broker_id,))
-    thread.start()
-    return jsonify({"message": "Broker successfully deleted"}), 200
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future = executor.submit(broker.delete_broker, broker_id)
+        result = future.result()
+    return jsonify("Successfully deleted")
 
 
 @app.route('/broker/get_replica', methods=['GET'])
