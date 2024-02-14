@@ -39,7 +39,7 @@ def update_brokers_subscriptions():
         )
 
     for broker_id in all_brokers.keys():
-        requests.post(f"{all_brokers[broker_id]}/update-brokers", data=json.dumps({"brokers": all_brokers}),
+        requests.post(f"{all_brokers[broker_id]}/subscription", data=json.dumps({"brokers": all_brokers}),
                       headers={"Content-Type": "application/json"})
 
 
