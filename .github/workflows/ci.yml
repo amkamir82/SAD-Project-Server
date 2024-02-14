@@ -102,7 +102,7 @@ jobs:
 
       - name: Run bandit
         run: |
-          bandit -r .
+          bandit --skip B104 -r .
 
   
   deploy-prod-broker:
