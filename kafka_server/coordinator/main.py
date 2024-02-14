@@ -7,6 +7,7 @@ from api.client.api import api_blueprint as client_api
 from api.broker.api import api_blueprint as broker_api
 
 from coordinator.services.client import subscribe as client_subscribe_service
+from coordinator.services.broker import subscribe as broker_subscribe_service
 
 COORDINATOR_PROJECT_PATH = os.getenv("COORDINATOR_PROJECT_PATH", "/app/")
 sys.path.append(os.path.abspath(COORDINATOR_PROJECT_PATH))
