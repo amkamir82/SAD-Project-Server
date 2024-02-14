@@ -60,24 +60,25 @@ def subscribe():
     for key in response_data.keys():
         if len(response_data[key]) < min_length:
             selected_broker_id = key
-    broker_url = f"{selected_broker_id}:{response_data[selected_broker_id]}"
+    broker_data = f"{selected_broker_id}:{response_data[selected_broker_id]}"
+    broker_url = {response_data[selected_broker_id]}
 
     tmp_dict = {}
-    if broker_url in all_subscriptions:
-        tmp_dict[broker_url] = []
-        tmp_dict[broker_url].append(all_subscriptions[broker_url])
-        tmp_dict[broker_url].append([client_addr, random_id])
+    if broker_data in all_subscriptions:
+        tmp_dict[broker_data] = []
+        tmp_dict[broker_data].append(all_subscriptions[broker_data])
+        tmp_dict[broker_data].append([client_addr, random_id])
     else:
-        tmp_dict[broker_url] = [[client_addr, random_id]]
+        tmp_dict[broker_data] = [[client_addr, random_id]]
     response_code = broker_subscribe_service.send_subscribe_to_broker(broker_url, tmp_dict)
     if response_code != 200:
         return jsonify("Error during sending subscription to broker"), response_code
 
-    response_code = client_database.add_subscription_plan(broker_url, client_addr, random_id)
+    response_code = client_database.add_subscription_plan(broker_data, client_addr, random_id)
     if response_code != 200:
         return jsonify("Error during adding subscription to database"), response_code
 
-    return jsonify({"broker_url": broker_url, "id": random_id}), 200
+    return jsonify({"broker_url": broker_data, "id": random_id}), 200
 
 
 @api_blueprint.route('/heartbeat', methods=['POST'])
