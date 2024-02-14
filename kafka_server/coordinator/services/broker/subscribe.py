@@ -48,9 +48,11 @@ def prepare_updating(all_brokers, down_broker_id, down_broker_url):
         raise Exception("Error during getting list of brokers replicas")
 
     # find replica of a broker which is on down broker
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
     for broker_id in all_brokers_replicas.keys():
         if all_brokers_replicas[broker_id] == down_broker_url:
             update_replica_partition_of_a_broker_which_is_in_down_broker(all_brokers[broker_id])
+    print("@@@@@@@@@@@@@@@@@@@@@@")
 
     # update all brokers
     update_brokers_subscriptions()
@@ -83,10 +85,9 @@ def update_brokers_list(broker_url):
     down_broker_id = None
     for broker_id in all_brokers.keys():
         data = all_brokers[broker_id]
-        print(data)
         if broker_url == data:
             down_broker_id = broker_id
-            print(f"########################sending request tp delete broker {broker_id}:{broker_url}")
+            print(f"########################sending request to delete broker {broker_id}:{broker_url}")
             response = requests.post(
                 "http://127.0.0.1:5001/broker/delete",
                 data=json.dumps({"broker_id": broker_id}),
