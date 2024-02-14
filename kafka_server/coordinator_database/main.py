@@ -186,7 +186,7 @@ def delete_broker_heartbeat():
 def list_of_replicas():
     with concurrent.futures.ThreadPoolExecutor() as executor:
         try:
-            future = executor.submit(broker.delete_heartbeat)
+            future = executor.submit(broker.list_of_replicas)
             _ = future.result()
         except Exception as e:
             logger.error(e)

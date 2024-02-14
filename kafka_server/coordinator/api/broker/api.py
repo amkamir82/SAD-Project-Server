@@ -45,7 +45,7 @@ def init_broker():
     master_coordinator_url = config.MASTER_COORDINATOR_URL
     backup_coordinator_url = config.BACKUP_COORDINATOR_URL
     # ToDo sync add broker
-    broker_subscriber_service.update_new_broker()
+    broker_subscriber_service.update_brokers_subscriptions()
     return jsonify({"replica_url": replica_url, "partition_count": partition_count,
                     "master_coordinator_url": master_coordinator_url,
                     "replica_coordinator_url": backup_coordinator_url}), 200
