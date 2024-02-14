@@ -2,18 +2,20 @@ import json
 import os
 import sys
 import threading
-from main import init
+
+
+BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
+sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
+
 from file.indexer import Indexer
 from file.read import Read
 from file.write import Write
+from main import init
 from flask import Flask, request, jsonify
 from manager.env import get_primary_partition, get_replica_url
 from metrics import coordinator_write_requests, coordinator_replicate_index_requests
 from prometheus_client import make_wsgi_app
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
-
-BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
-sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
 
 
 app = Flask(__name__)
