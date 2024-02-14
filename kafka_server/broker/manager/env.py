@@ -7,7 +7,7 @@ def get_primary_partition() -> str:
 
 def get_replica_url():
     url = os.getenv('REPLICA_URL')
-    if len(url) <= 1:
+    if url is None or len(url) <= 1:
         return None
     return url
 
