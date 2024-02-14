@@ -2,10 +2,6 @@ import json
 import os
 import sys
 import threading
-
-BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
-sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
-
 from main import init
 from file.indexer import Indexer
 from file.read import Read
@@ -16,7 +12,6 @@ from metrics import coordinator_write_requests, coordinator_replicate_index_requ
 from prometheus_client import make_wsgi_app
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
-
 BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
 sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
 
@@ -25,7 +20,6 @@ app = Flask(__name__)
 app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
     '/metrics': make_wsgi_app()
 })
-
 
 
 @app.route('/')

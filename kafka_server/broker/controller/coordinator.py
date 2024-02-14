@@ -1,8 +1,11 @@
 import json
+import logging
 import os
 import time
 import psutil
 import requests
+
+logger = logging.getLogger(__name__)
 
 
 def _master_coordinator_url() -> str:
@@ -56,6 +59,7 @@ def _get(data, url: str):
             if response.status_code == 200:
                 return json.loads(response.content.decode("utf-8"))
         except requests.RequestException as e:
+            logger.error(e)
             print(f"Error on {i}")
 
     return False
