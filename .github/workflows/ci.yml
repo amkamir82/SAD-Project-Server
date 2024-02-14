@@ -120,18 +120,26 @@ jobs:
         known_hosts: ${{ secrets.SSH_HOST }}
     - name: connect and pull
       run: |
-        ssh -i ~/.ssh/id_rsa ubuntu@37.152.176.203 "docker compose up -d broker-1 broker-2 broker-3 && exit"
+        ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker-compose up -d broker-1 broker-2 broker-3 && exit"
     - name: cleanup
       run: rm -rf ~/.ssh
 
   deploy-prod-coordinator:
     name: Deploy Coordinator to Production
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build-push-coordinator
 
     steps:
-      - name: Deploy to production
-        run: |
-          # Here you can add your deployment commands/scripts
-          # For example:
-          ssh user@your-production-server 'docker pull ghcr.io/your-github-username/your-repo-name:latest && docker-compose up -d'
+    - name: checkout repo
+      uses: actions/checkout@v2
+    
+    - name: set up ssh keys
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        known_hosts: ${{ secrets.SSH_HOST }}
+    - name: connect and pull
+      run: |
+        ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker-compose up -d coordinator-1 coordinator-2 && exit"
+    - name: cleanup
+      run: rm -rf ~/.ssh
