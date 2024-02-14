@@ -30,16 +30,19 @@ def update_brokers_subscriptions():
     if response_code != 200:
         raise Exception("Error during getting list of clients from database")
 
-    for client_url in all_clients:
-        requests.post(
-            f"{client_url}/subscription",
-            data=json.dumps({"brokers": all_brokers}),
-            timeout=2,
-        )
+    try:
+        for client_url in all_clients:
+            requests.post(
+                f"{client_url}/subscription",
+                data=json.dumps({"brokers": all_brokers}),
+                timeout=2,
+            )
 
-    for broker_id in all_brokers.keys():
-        requests.post(f"{all_brokers[broker_id]}/subscription", data=json.dumps({"brokers": all_brokers}),
-                      headers={"Content-Type": "application/json"}, timeout=2)
+        for broker_id in all_brokers.keys():
+            requests.post(f"{all_brokers[broker_id]}/subscription", data=json.dumps({"brokers": all_brokers}),
+                          headers={"Content-Type": "application/json"}, timeout=2)
+    except Exception as e:
+        print(str(e))
 
 
 def prepare_updating(all_brokers, down_broker_id, down_broker_url):
@@ -105,21 +108,24 @@ def update_brokers_list(broker_url):
 
 
 def check_heartbeat():
-    response = requests.get('http://127.0.0.1:5001/broker/list_all_heartbeats', timeout=2)
-    data = response.json()
+    try:
+        response = requests.get('http://127.0.0.1:5001/broker/list_all_heartbeats', timeout=2)
+        data = response.json()
 
-    if len(data) == 0:
-        return
-    for key in data.keys():
-        datetime_seconds = float(data[key])
-        diff_seconds = datetime.now().timestamp() - datetime_seconds
-        if diff_seconds > 15:
-            requests.post(
-                "http://127.0.0.1:5001/broker/delete_heartbeat",
-                data=json.dumps({"broker_url": key}),
-                timeout=2,
-            )
-            update_brokers_list(key)
+        if len(data) == 0:
+            return
+        for key in data.keys():
+            datetime_seconds = float(data[key])
+            diff_seconds = datetime.now().timestamp() - datetime_seconds
+            if diff_seconds > 15:
+                requests.post(
+                    "http://127.0.0.1:5001/broker/delete_heartbeat",
+                    data=json.dumps({"broker_url": key}),
+                    timeout=2,
+                )
+                update_brokers_list(key)
+    except Exception as e:
+        print(str(e))
 
 
 def run_check_heartbeat_job():

@@ -59,9 +59,6 @@ def subscribe():
     selected_broker_id = None
     print("#######find broker for subscriber")
     for key in all_brokers.keys():
-        print(key)
-        print(all_brokers)
-        print(all_subscriptions)
         if f"{key}:{all_brokers[key]}" not in all_subscriptions.keys():
             print("check by first if")
             selected_broker_id = key
