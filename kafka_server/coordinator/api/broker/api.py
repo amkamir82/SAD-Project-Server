@@ -2,6 +2,7 @@ import datetime
 import json
 import os
 import sys
+import random
 
 from coordinator.services.broker import subscribe as broker_subscriber_service
 from coordinator.services.broker import database as broker_database
@@ -31,20 +32,20 @@ def init_broker():
     if response_code != 200:
         return jsonify("Error during initializing broker"), response_code
 
-    # if len(all_brokers) > 1:
-    #     keys = all_brokers.keys()
-    #     key = random.choice(list(keys))
-    #     replica_url = all_brokers[key]
-    #     response_code = broker_database.add_replica_for_broker(broker_id, replica_url)
-    #     if response_code != 200:
-    #         return jsonify("Error during initializing broker"), response_code
-    #     return jsonify(replica_url), 200
+    replica_url = None
+    if broker_id not in all_brokers_replicas:
+        keys = all_brokers.keys()
+        key = random.choice(list(keys))
+        replica_url = all_brokers[key]
+        response_code = broker_database.add_replica_for_broker(broker_id, replica_url)
+        if response_code != 200:
+            return jsonify("Error during initializing broker"), response_code
+    else:
+        replica_url = all_brokers_replicas[broker_id]
 
-    replica_url = all_brokers_replicas[broker_id]
     partition_count = len(all_brokers)
     master_coordinator_url = config.MASTER_COORDINATOR_URL
     backup_coordinator_url = config.BACKUP_COORDINATOR_URL
-    # ToDo sync add broker
     broker_subscriber_service.update_brokers_subscriptions()
     return jsonify({"replica_url": replica_url, "partition_count": partition_count,
                     "master_coordinator_url": master_coordinator_url,

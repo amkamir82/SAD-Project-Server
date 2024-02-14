@@ -22,23 +22,27 @@ def update_brokers_subscription_plan():
 
 
 def check_heartbeat():
+    print("##############checing heartbeats")
     response = requests.get(
         'http://127.0.0.1:5001/client/list_all_heartbeats',
         timeout=2,
     )
     data = response.json()
-
+    print(data)
     if len(data) == 0:
         return
     for key in data.keys():
         datetime_seconds = float(data[key])
         diff_seconds = datetime.now().timestamp() - datetime_seconds
         if diff_seconds > 30:
+            print("##############delete client heartbeat")
             requests.post(
                 "http://127.0.0.1:5001/client/delete_heartbeat",
                 data=json.dumps({"client_url": key}),
                 timeout=2,
             )
+
+            print("##############delete all subscriptions for client")
             requests.post(
                 "http://127.0.0.1:5001/subscribe/delete",
                 data=json.dumps({"client_url": key}),

@@ -51,25 +51,30 @@ def subscribe():
     if response_code != 200:
         return jsonify("Error during getting list of brokers from database"), response_code
 
-    response_code, response_data = broker_database.list_all_brokers()
+    response_code, all_brokers = broker_database.list_all_brokers()
     if response_code != 200:
         return jsonify("Error during getting list of brokers from database"), response_code
 
-    min_length = 10000
+    min_length = 1000000
     selected_broker_id = None
-    for key in response_data.keys():
-        if len(response_data[key]) < min_length:
+
+    for key in all_brokers.keys():
+        if key not in all_subscriptions.keys():
             selected_broker_id = key
-    broker_data = f"{selected_broker_id}:{response_data[selected_broker_id]}"
-    broker_url = response_data[selected_broker_id]
+            break
+        if len(all_subscriptions[key]) < min_length:
+            min_length = len(all_subscriptions[key])
+            selected_broker_id = key
+
+    broker_data = f"{selected_broker_id}:{all_brokers[selected_broker_id]}"
+    broker_url = all_brokers[selected_broker_id]
 
     tmp_dict = {}
     if broker_data in all_subscriptions:
-        tmp_dict[broker_data] = []
-        tmp_dict[broker_data].append(all_subscriptions[broker_data])
-        tmp_dict[broker_data].append([client_addr, random_id])
+        for subs in all_subscriptions[broker_data]:
+            tmp_dict[subs[1]] = subs[0]
     else:
-        tmp_dict[broker_data] = [[client_addr, random_id]]
+        tmp_dict[random_id] = client_addr
     response_code = broker_subscribe_service.send_subscribe_to_broker(broker_url, tmp_dict)
     if response_code != 200:
         return jsonify("Error during sending subscription to broker"), response_code
