@@ -57,8 +57,11 @@ def subscribe():
 
     min_length = 1000000
     selected_broker_id = None
-
+    print("#######find broker for subscriber")
     for key in all_brokers.keys():
+        print(key)
+        print(all_brokers)
+        print(all_subscriptions)
         if key not in all_subscriptions.keys():
             selected_broker_id = key
             break
