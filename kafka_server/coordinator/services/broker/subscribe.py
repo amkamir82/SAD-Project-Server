@@ -13,6 +13,7 @@ def get_all_subscriptions():
 
 
 def send_subscribe_to_broker(broker_url, data):
+    print("daaatttttaaaaaaaaa", data)
     r = requests.post(
         f"{broker_url}/subscribers",
         data=json.dumps({"subscribers": data}),
