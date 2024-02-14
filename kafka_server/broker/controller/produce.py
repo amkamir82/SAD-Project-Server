@@ -112,7 +112,6 @@ def subscription():
         os.environ['PARTITION_COUNT'] = str(len(brokers))
         indexer = Indexer(get_primary_partition(), get_replica_url())
         indexer.update_read_sync(indexer.get_read(), indexer.get_read())
-        print(brokers)
 
         return jsonify({'status': 'Data written successfully.'}), 200
 
