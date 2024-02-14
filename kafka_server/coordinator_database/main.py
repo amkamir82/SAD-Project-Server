@@ -187,11 +187,12 @@ def list_of_replicas():
     with concurrent.futures.ThreadPoolExecutor() as executor:
         try:
             future = executor.submit(broker.list_of_replicas)
-            _ = future.result()
+            result = future.result()
         except Exception as e:
             logger.error(e)
             return jsonify("Error deleting broker heartbeat"), 500
-    return jsonify("Successfully deleting broker heartbeat"), 200
+    return jsonify(result), 200
+
 
 if __name__ == '__main__':
     app.run(port=5001)
