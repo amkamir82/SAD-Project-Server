@@ -41,7 +41,6 @@ class Segment:
             return False
         return True
 
-        # self.indexer.inc_write()
 
     def approve_appending(self):
         try:
