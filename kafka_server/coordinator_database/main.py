@@ -195,5 +195,19 @@ def list_of_replicas():
     return jsonify(result), 200
 
 
+@app.route('/subscribe/write_subscriptions', methods=['POST'])
+def write_subscriptions():
+    data = json.loads(request.data.decode('utf-8'))
+    data = data["subscriptions"]
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        try:
+            future = executor.submit(subscribe.write_subscriptions, data)
+            result = future.result()
+        except Exception as e:
+            logger.error(e)
+            return jsonify("Error deleting broker heartbeat"), 500
+    return jsonify(result), 200
+
+
 if __name__ == '__main__':
     app.run(port=5001)
