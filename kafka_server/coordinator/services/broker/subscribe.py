@@ -117,6 +117,67 @@ def update_brokers_list(broker_url):
     update_brokers_subscriptions()
 
 
+def update_subscribers():
+    print("#########3updating subscribers after broker down")
+    response_code, all_subscriptions = get_all_subscriptions()
+    print("################allllll subscriptions\n", all_subscriptions)
+    if response_code != 200:
+        raise Exception("Error during getting list of brokers from database")
+
+    response_code, all_brokers = broker_database.list_all_brokers()
+    if response_code != 200:
+        raise Exception("Error during getting list of brokers from database")
+
+    all_subscribers = []
+    for broker_id_url in all_subscriptions.keys():
+        for sub in all_subscriptions[broker_id_url]:
+            all_subscribers.append(sub)
+
+    print("######all subscriber before\n", all_subscribers)
+    unique_tuples = set(tuple(x) for x in all_subscribers)
+    all_subscribers = [list(x) for x in unique_tuples]
+
+    all_subscribers = list(all_subscribers)
+    tmp_subscriptions = {}
+    all_subscribers_length = len(all_subscribers)
+    all_brokers_length = len(all_brokers)
+    print("######all subscribers\n", all_subscribers)
+    ex = all_subscribers_length // all_brokers_length
+    print("###########ex ", ex)
+    j = 0
+    for broker_id in all_brokers:
+        i = ex
+        while i > 0:
+            if f"{broker_id}:{all_brokers[broker_id]}" not in tmp_subscriptions:
+                tmp_subscriptions[f"{broker_id}:{all_brokers[broker_id]}"] = []
+            tmp_subscriptions[f"{broker_id}:{all_brokers[broker_id]}"].append(all_subscribers[j])
+            j += 1
+            i -= 1
+
+    print("####aghaei\n", tmp_subscriptions)
+
+    for index in range(j, len(all_subscribers)):
+        for broker_id in all_brokers:
+            if f"{broker_id}:{all_brokers[broker_id]}" not in tmp_subscriptions:
+                tmp_subscriptions[f"{broker_id}:{all_brokers[broker_id]}"] = []
+            tmp_subscriptions[f"{broker_id}:{all_brokers[broker_id]}"].append(all_subscribers[index])
+
+    print("####aghaei2\n", tmp_subscriptions)
+
+    for broker_id in all_brokers.keys():
+        t = {}
+        for sub in tmp_subscriptions[f"{broker_id}:{all_brokers[broker_id]}"]:
+            t[sub[1]] = sub[0]
+        print("##########senda subscriptions to broker")
+        print(t)
+        send_subscribe_to_broker(all_brokers[broker_id], t)
+
+    print("@@@@@@@@tmp_subscriptions to write\n", tmp_subscriptions)
+    response_code = write_subscriptions(tmp_subscriptions)
+    if response_code != 200:
+        raise Exception("Error during finding broker for subscribe")
+
+
 def check_heartbeat():
     try:
         response = requests.get('http://127.0.0.1:5001/broker/list_all_heartbeats', timeout=2)
@@ -134,6 +195,7 @@ def check_heartbeat():
                     timeout=2,
                 )
                 update_brokers_list(key)
+                update_subscribers()
     except Exception as e:
         print(str(e))
 
