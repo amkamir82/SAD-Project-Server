@@ -65,6 +65,7 @@ class Read:
             md5 = hash_md5(key)
             partition_count = get_partition_count()
             if int(md5, 16) % partition_count != int(self.partition) - 1:
+                print("data for other partition", flush=True)
                 self.segment.approve_reading()
                 return self.read_data()
 
@@ -130,6 +131,7 @@ class Read:
             'subscribers.json'
         )
         if not os.path.exists(subscriptions_file_path):
+            print("No subscriptions file found")
             return []
 
         with open(subscriptions_file_path, 'r', encoding='utf8') as f:
