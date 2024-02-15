@@ -18,16 +18,12 @@ class Segment:
 
     def __new__(cls, partition: str, replica: str):
         with cls._instances_lock:
-            if partition not in cls._instances:
-                cls._instances[partition] = super(Segment, cls).__new__(cls)
-                cls._instances[partition].partition = partition
-                cls._instances[partition].indexer = Indexer(partition, replica)
-                cls._instances[partition].replica = replica
+            if f"{partition}-{replica}" not in cls._instances:
+                cls._instances[f"{partition}-{replica}"] = super(Segment, cls).__new__(cls)
+                cls._instances[f"{partition}-{replica}"].partition = partition
+                cls._instances[f"{partition}-{replica}"].indexer = Indexer(partition, replica)
 
-            if replica is not None and cls._instances[partition].replica is None:
-                cls._instances[partition].indexer = Indexer(partition, replica)
-
-            return cls._instances[partition]
+            return cls._instances[f"{partition}-{replica}"]
 
     def append(self, key: str, value: str):
         try:

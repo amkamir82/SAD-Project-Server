@@ -19,17 +19,14 @@ sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
 class Read:
     _instances_lock = threading.Lock()
     _read_lock = threading.Lock()
-    _instance = None
+    _instances = {}
 
     def __new__(cls, partition: str, replica: str):
-        if cls._instance is None:
+        if f"{partition}-{replica}" not in cls._instances[f"{partition}-{replica}"]:
             with cls._instances_lock:
-                if cls._instance is None:
-                    cls._instance = super().__new__(cls)
-                    cls._instance.replica = replica
-        if replica is not None and cls._instance.replica is None:
-            cls._instance.segment = Segment(partition, replica)
-        return cls._instance
+                cls._instances[f"{partition}-{replica}"] = super().__new__(cls)
+
+        return cls._instances[f"{partition}-{replica}"]
 
     def __init__(self, partition: str, replica: str):
         self.subscribers = None
