@@ -140,6 +140,7 @@ class Read:
 
         with open(subscriptions_file_path, 'r', encoding='utf8') as f:
             subscribers = json.load(f)
+            print("Found {} subscribers".format(subscribers))
 
         return subscribers
 
@@ -164,7 +165,10 @@ class Read:
         id_to_key = {}
         for i, key in enumerate(self.subscribers.keys()):
             id_to_key[i] = key
+
+        print("id_to_key", id_to_key)
         chosen_key = id_to_key[read_index % subscriber_count]
+        print("chosen_key", chosen_key)
         return chosen_key, self.subscribers[chosen_key]
 
     def load_message_in_fly(self):
