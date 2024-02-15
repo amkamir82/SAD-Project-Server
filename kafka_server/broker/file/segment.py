@@ -41,7 +41,6 @@ class Segment:
             return False
         return True
 
-
     def approve_appending(self):
         try:
             with self._append_lock:
