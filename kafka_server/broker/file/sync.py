@@ -78,7 +78,10 @@ class Sync:
         return brokers
 
     def send_to_broker(self, key: str, value: str, broker_id: int) -> bool:
-        url = f'{self.brokers[broker_id]}/write'
+        broker_list = []
+        for key, value in self.brokers:
+            broker_list.append([key, value])
+        url = f'{broker_list[broker_id][1]}/write'
         print(f"sync {key} to {url}", flush=True)
 
         try:
