@@ -17,7 +17,7 @@ def update_brokers_subscription_plan():
             t[sub[0]] = sub[1]
 
         response = requests.post(
-            f"http://{broker_url}/subscribers",
+            f"{broker_url[2:]}/subscribers",
             data=json.dumps({"subscribers": data}),
             timeout=2,
         )
@@ -53,7 +53,7 @@ def check_heartbeat():
                     data=json.dumps({"client_url": key}),
                     timeout=2,
                 )
-        update_brokers_subscription_plan()
+                update_brokers_subscription_plan()
     except Exception as e:
         print(str(e))
 
