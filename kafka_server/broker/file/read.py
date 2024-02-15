@@ -150,7 +150,7 @@ class Read:
 
         try:
             response = requests.post(url, json={'key': key, 'value': value}, timeout=2)
-            if response != 200:
+            if response.status_code != 200:
                 print(response.json(), response.content, response.status_code)
 
             return response.status_code == 200
