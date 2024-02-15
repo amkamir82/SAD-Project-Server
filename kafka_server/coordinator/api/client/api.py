@@ -69,16 +69,16 @@ def subscribe():
         i = ex
         while i > 0:
             if f"{broker_id}:{all_brokers[broker_id]}" not in tmp_subscriptions:
-                tmp_subscriptions[f"{broker_id}:{all_subscriptions[broker_id]}"] = []
-            tmp_subscriptions[f"{broker_id}:{all_subscriptions[broker_id]}"].append(all_subscribers[j])
+                tmp_subscriptions[f"{broker_id}:{all_brokers[broker_id]}"] = []
+            tmp_subscriptions[f"{broker_id}:{all_brokers[broker_id]}"].append(all_subscribers[j])
             j += 1
             i -= 1
 
     for index in range(j, len(all_subscribers)):
         for broker_id in all_brokers:
             if f"{broker_id}:{all_brokers[broker_id]}" not in tmp_subscriptions:
-                tmp_subscriptions[f"{broker_id}:{all_subscriptions[broker_id]}"] = []
-            tmp_subscriptions[f"{broker_id}:{all_subscriptions[broker_id]}"].append(all_subscribers[j])
+                tmp_subscriptions[f"{broker_id}:{all_brokers[broker_id]}"] = []
+            tmp_subscriptions[f"{broker_id}:{all_brokers[broker_id]}"].append(all_subscribers[j])
 
     all_brokers_for_client = []
     for t_s in tmp_subscriptions.keys():
