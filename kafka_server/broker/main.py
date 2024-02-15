@@ -51,9 +51,9 @@ def init():
     heartbeat_thread.daemon = True
     heartbeat_thread.start()
 
-    # sync_thread = threading.Thread(target=schedule_sync_thread)
-    # sync_thread.daemon = True
-    # sync_thread.start()
+    sync_thread = threading.Thread(target=schedule_sync_thread)
+    sync_thread.daemon = True
+    sync_thread.start()
 
     sync_replica_thread = threading.Thread(target=sync_replica)
     sync_replica_thread.daemon = True
