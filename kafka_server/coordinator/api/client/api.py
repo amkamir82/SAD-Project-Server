@@ -88,8 +88,7 @@ def subscribe():
         for broker_id in all_brokers:
             if f"{broker_id}:{all_brokers[broker_id]}" not in tmp_subscriptions:
                 tmp_subscriptions[f"{broker_id}:{all_brokers[broker_id]}"] = []
-            tmp_subscriptions[f"{broker_id}:{all_brokers[broker_id]}"].append(all_subscribers[j])
-            j += 1
+            tmp_subscriptions[f"{broker_id}:{all_brokers[broker_id]}"].append(all_subscribers[index])
 
     print("####aghaei2\n", tmp_subscriptions)
 
