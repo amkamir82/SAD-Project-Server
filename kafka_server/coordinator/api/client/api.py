@@ -48,6 +48,7 @@ def subscribe():
     random_id = random.randint(1, 1000000)
 
     response_code, all_subscriptions = broker_subscribe_service.get_all_subscriptions()
+    print("################allllll subscriptions\n", all_subscriptions)
     if response_code != 200:
         return jsonify("Error during getting list of brokers from database"), response_code
 
