@@ -171,7 +171,7 @@ def update_subscribers():
         t = {}
         for sub in tmp_subscriptions[f"{broker_id}:{all_brokers[broker_id]}"]:
             t[sub[1]] = sub[0]
-        print("##########senda subscriptions to broker")
+        print("##########send subscriptions to broker")
         print(t)
         send_subscribe_to_broker(all_brokers[broker_id], t)
 
