@@ -53,7 +53,7 @@ def check_heartbeat():
                     data=json.dumps({"client_url": key}),
                     timeout=2,
                 )
-                update_brokers_subscription_plan()
+        update_brokers_subscription_plan()
     except Exception as e:
         print(str(e))
 
