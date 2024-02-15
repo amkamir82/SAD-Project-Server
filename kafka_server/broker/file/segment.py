@@ -24,7 +24,7 @@ class Segment:
                 cls._instances[partition].indexer = Indexer(partition, replica)
             return cls._instances[partition]
 
-    def append(self, key: str, value: bytes):
+    def append(self, key: str, value: str):
         try:
             with self._append_lock:
                 segment_path = self.write_segment_path()
@@ -32,13 +32,9 @@ class Segment:
                     os.makedirs(segment_path, exist_ok=True)
 
                 data_file_path = os.path.join(segment_path, f'{self.indexer.get_write()}.dat')
-                kb = 1024
 
                 with open(data_file_path, 'w') as entry_file:
-                    entry_file.write(f'{key}: ')
-                    for i in range(0, len(value), kb):
-                        chunk = value[i:i + kb]
-                        entry_file.write(chunk.decode('utf-8'))
+                    entry_file.write(f'{key}: {value}')
         except Exception as e:
             print(f"Error appending data to segment: {e}")
             return False

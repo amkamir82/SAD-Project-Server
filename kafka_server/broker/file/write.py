@@ -28,7 +28,7 @@ class Write:
         self.segment = Segment(partition, replica)
         self.replica = replica
 
-    def write_data(self, key: str, value: bytes):
+    def write_data(self, key: str, value: str):
         with self._write_lock:
             md5 = hash_md5(key)
             partition_count = get_partition_count()
@@ -49,12 +49,11 @@ class Write:
         if self.segment.append(key, value):
             return self.segment.approve_appending()
 
-    def send_to_replica(self, key: str, value: bytes) -> bool:
+    def send_to_replica(self, key: str, value: str) -> bool:
         url = f'{self.replica}/replica/data'
-        value_str = value.decode('utf-8')
         response = requests.post(
             url,
-            json={'key': key, 'value': value_str, 'partition': self.partition},
+            json={'key': key, 'value': value, 'partition': self.partition},
             timeout=2,
         )
 
