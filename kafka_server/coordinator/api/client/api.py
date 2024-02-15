@@ -106,6 +106,7 @@ def subscribe():
         print(t)
         broker_subscribe_service.send_subscribe_to_broker(all_brokers[broker_id], t)
 
+    print("@@@@@@@@tmp_subscriptions to write\n", tmp_subscriptions)
     response_code = broker_subscribe_service.write_subscriptions(tmp_subscriptions)
     if response_code != 200:
         return jsonify("Error during finding broker for subscribe"), response_code
