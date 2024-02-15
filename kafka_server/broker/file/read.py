@@ -84,7 +84,6 @@ class Read:
             return sent
 
     def pull_data(self):
-        print("sync index: ", self.indexer.get_sync())
         self.load_message_in_fly()
         if self.message_in_fly:
             print("there is message in fly")
