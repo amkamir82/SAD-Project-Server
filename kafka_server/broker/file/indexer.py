@@ -110,6 +110,6 @@ class Indexer:
         url = f'{self.replica}/replica/index'
         data = {'partition': self.partition, 'read': self._read, 'sync': self._sync}
         print(data, "to Replica")
-        response = requests.post(url, json=data)
+        response = requests.post(url, json=data, timeout=2)
         if response.status_code != 200:
             raise Exception(f'indexed not yet updated {response}')
