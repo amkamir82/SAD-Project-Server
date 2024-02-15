@@ -75,6 +75,9 @@ def prepare_updating(all_brokers, down_broker_id, down_broker_url):
     # update all brokers
     update_brokers_subscriptions()
 
+    # update new subscription plans
+    update_subscribers()
+
     # find replica of down broker
     down_broker_replica_url = all_brokers_replicas[down_broker_id]
     update_replica_partition_of_a_down_broker(down_broker_id, down_broker_replica_url)
@@ -195,7 +198,6 @@ def check_heartbeat():
                     timeout=2,
                 )
                 update_brokers_list(key)
-                update_subscribers()
     except Exception as e:
         print(str(e))
 
