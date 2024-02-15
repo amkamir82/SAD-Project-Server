@@ -103,6 +103,7 @@ class Indexer:
 
     def send_to_replica(self):
         if self.replica is None:
+            print("No replica found /n/n/n")
             return
         url = f'{self.replica}/replica/index'
         data = {'partition': self.partition, 'read': self._read, 'sync': self._sync}
