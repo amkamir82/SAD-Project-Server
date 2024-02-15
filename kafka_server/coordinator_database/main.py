@@ -202,11 +202,11 @@ def write_subscriptions():
     with concurrent.futures.ThreadPoolExecutor() as executor:
         try:
             future = executor.submit(subscribe.write_subscriptions, data)
-            result = future.result()
+            _ = future.result()
         except Exception as e:
             logger.error(e)
             return jsonify("Error deleting broker heartbeat"), 500
-    return jsonify(result), 200
+    return jsonify("Successfully write subscriptions"), 200
 
 
 if __name__ == '__main__':

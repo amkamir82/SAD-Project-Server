@@ -14,7 +14,7 @@ def get_all_subscriptions():
 
 def write_subscriptions(subscriptions):
     r = requests.get("http://127.0.0.1:5001//subscribe/write_subscriptions", data=json.dumps(subscriptions), timeout=2)
-    return r.status_code, r.json()
+    return r.status_code
 
 
 def send_subscribe_to_broker(broker_url, data):
