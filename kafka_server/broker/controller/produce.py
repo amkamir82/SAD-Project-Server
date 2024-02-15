@@ -158,6 +158,7 @@ def replica_down():
 @app.route('/pull', methods=['GET'])
 def pull():
     try:
+        print("replica url", get_replica_url())
         read = Read(get_primary_partition(), get_replica_url())
         key, value = read.pull_data()
         return jsonify({'key': key, 'value': value}), 200
