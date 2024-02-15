@@ -44,6 +44,7 @@ class Sync:
             broker_id = int(md5, 16) % partition_count
             if broker_id == (int(self.partition) - 1) % partition_count:
                 self.segment.approve_sync()
+                print("this key is for this partition")
                 return self.sync_data()
             print("send sync data to broker", broker_id)
 
