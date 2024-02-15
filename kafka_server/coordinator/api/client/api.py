@@ -87,8 +87,12 @@ def subscribe():
                 all_brokers_for_client.append(t_s)
 
     for broker_id in all_brokers.keys():
-        broker_subscribe_service.send_subscribe_to_broker(all_brokers[broker_id], tmp_subscriptions[
-            f"{broker_id}:{all_brokers[broker_id]}"])
+        t = {}
+        for sub in tmp_subscriptions[f"{broker_id}:{all_brokers[broker_id]}"]:
+            t[sub[1]] = sub[0]
+        print("##########senda subscriptions to broker")
+        print(t)
+        broker_subscribe_service.send_subscribe_to_broker(all_brokers[broker_id], t)
 
     response_code = broker_subscribe_service.write_subscriptions(tmp_subscriptions)
     if response_code != 200:
