@@ -64,6 +64,7 @@ def subscribe():
     all_subscribers_length = len(all_subscribers)
     all_brokers_length = len(all_brokers)
     ex = all_subscribers_length // all_brokers_length
+    print("###########ex ", ex)
     j = 0
     for broker_id in all_brokers:
         i = ex
@@ -74,11 +75,15 @@ def subscribe():
             j += 1
             i -= 1
 
+    print("####aghaei\n", tmp_subscriptions)
+
     for index in range(j, len(all_subscribers)):
         for broker_id in all_brokers:
             if f"{broker_id}:{all_brokers[broker_id]}" not in tmp_subscriptions:
                 tmp_subscriptions[f"{broker_id}:{all_brokers[broker_id]}"] = []
             tmp_subscriptions[f"{broker_id}:{all_brokers[broker_id]}"].append(all_subscribers[j])
+
+    print("####aghaei2\n", tmp_subscriptions)
 
     all_brokers_for_client = []
     for t_s in tmp_subscriptions.keys():
