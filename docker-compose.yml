@@ -45,29 +45,45 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
-    command:
-      - --storage.tsdb.retention.time=7d
-      - --config.file=/etc/prometheus/prometheus.yml
-      # - --storage.tsdb.retention.size=10GB
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
     ports:
       - "9090:9090"
-    volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - broker
 
   grafana:
     image: grafana/grafana:latest
     ports:
       - "3000:3000"
     volumes:
-      - ./monitoring/grafana-provisioning/dashboards:/etc/grafana/provisioning/dashboards
-      - ./monitoring/grafana-provisioning/datasources:/etc/grafana/provisioning/datasources
-
-  node_exporter:
-    image: prom/node-exporter:latest
-    ports:
-      - "9100:9100"
+      - grafana-data:/var/lib/grafana
     networks:
       - broker
 
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node_exporter
+    command:
+      - '--path.rootfs=/host'
+    pid: host
+    ports:
+      - "9100:9100"
+    restart: unless-stopped
+    volumes:
+      - '/:/host:ro,rslave'
+    networks:
+      - broker
+
+volumes:
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+
 networks:
   broker:
+    driver: bridge

@@ -141,3 +141,21 @@ jobs:
       run: |
         ls
         ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker-compose up -d coordinator-1 coordinator-2 && exit"
+
+  deploy-monitoring:
+    name: Deploy Monitoring to Production
+    runs-on: self-hosted
+
+    steps:
+    - name: checkout repo
+      uses: actions/checkout@v4
+    
+    - name: set up ssh keys
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        known_hosts: ${{ secrets.SSH_HOST }}
+    - name: connect and pull
+      run: |
+        ls
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker-compose up -d node_exporter prometheus grafana && exit"
