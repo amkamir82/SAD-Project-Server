@@ -40,7 +40,9 @@ class Indexer:
     def inc_read(self):
         with self._read_lock:
             self._read += 1
+            print("save read index\n\n")
             self._save_variable(self._read, 'read')
+            print("send read index\n\n")
             self.send_to_replica()
 
     def get_read(self):
@@ -102,11 +104,13 @@ class Indexer:
         )
 
     def send_to_replica(self):
+        print("sending to replica started!!!\n\n\n\n")
         if self.replica is None:
             print("No replica found /n/n/n")
             return
+
         url = f'{self.replica}/replica/index'
         data = {'partition': self.partition, 'read': self._read, 'sync': self._sync}
-        response = requests.post(url, json=data, timeout=2)
+        response = requests.post(url, json=data)
         if response.status_code != 200:
             raise Exception(f'indexed not yet updated {response}')
