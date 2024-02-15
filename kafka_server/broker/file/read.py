@@ -66,7 +66,7 @@ class Read:
             key, value = self.segment.read()
             md5 = hash_md5(key)
             partition_count = get_partition_count()
-            if int(md5, 16) % partition_count != int(self.partition) - 1:
+            if int(md5, 16) % partition_count != (int(self.partition) - 1) % partition_count:
                 print("data for other partition", flush=True)
                 self.segment.approve_reading()
                 return self.read_data()
@@ -88,7 +88,7 @@ class Read:
         if self.message_in_fly:
             print("there is message in fly")
             return None, None
-        print("there is no message in fly", flush=True)
+        print("there is no message in fly in pull", flush=True)
         if not self.check_data_exist():
             return None, None
 
@@ -98,7 +98,7 @@ class Read:
 
             md5 = hash_md5(key)
             partition_count = get_partition_count()
-            if int(md5, 16) % partition_count != int(self.partition) - 1:
+            if int(md5, 16) % partition_count != (int(self.partition) - 1) % partition_count:
                 self.segment.approve_reading()
                 return self.pull_data()
 
