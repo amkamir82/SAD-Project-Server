@@ -16,7 +16,7 @@ sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
 class Sync:
     _instances_lock = threading.Lock()
     _sync_lock = threading.Lock()
-    _instances = None
+    _instances = {}
 
     def __new__(cls, partition: str, replica: str):
         if f"{partition}-{replica}" not in  cls._instances:
