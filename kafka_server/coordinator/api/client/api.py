@@ -55,11 +55,13 @@ def subscribe():
     if response_code != 200:
         return jsonify("Error during getting list of brokers from database"), response_code
 
-    all_subscribers = set()
-    all_subscribers.add([client_addr, random_id])
+    all_subscribers = [[client_addr, random_id]]
     for broker_id_url in all_subscriptions.keys():
         for sub in all_subscriptions[broker_id_url]:
-            all_subscribers.add(sub)
+            all_subscribers.append(sub)
+
+    unique_tuples = set(tuple(x) for x in all_subscribers)
+    all_subscribers = [list(x) for x in unique_tuples]
 
     all_subscribers = list(all_subscribers)
     tmp_subscriptions = {}
