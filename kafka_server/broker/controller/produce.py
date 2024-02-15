@@ -139,6 +139,7 @@ def broker_down():
         data = json.loads(request.data.decode("utf-8"))
         partition = data['partition']
         os.environ['REPLICA_MIRROR_DOWN'] = str(partition)
+        print(os.environ['REPLICA_MIRROR_DOWN'], "replica mirror down")
         return jsonify({'status': 'Data written successfully.'}), 200
     except Exception as e:
         print(e)

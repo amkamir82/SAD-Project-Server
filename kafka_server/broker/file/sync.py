@@ -16,14 +16,13 @@ sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
 class Sync:
     _instances_lock = threading.Lock()
     _sync_lock = threading.Lock()
-    _instance = None
+    _instances = None
 
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
+    def __new__(cls, partition: str, replica: str):
+        if f"{partition}-{replica}" not in  cls._instances:
             with cls._instances_lock:
-                if cls._instance is None:
-                    cls._instance = super().__new__(cls)
-        return cls._instance
+                    cls._instances[f"{partition}-{replica}"] = super().__new__(cls)
+        return cls._instances[f"{partition}-{replica}"]
 
     def __init__(self, partition: str, replica: str):
         if not hasattr(self, 'initialized'):
@@ -33,6 +32,7 @@ class Sync:
             self.initialized = True
 
     def sync_data(self):
+        print("Syncing data... partition ", self.partition)
         if not self.check_data_exist():
             return None, None
 
@@ -53,8 +53,7 @@ class Sync:
 
     def check_data_exist(self):
         if self.segment.get_sync_index() >= self.segment.get_write_index():
-            print(f"No key found {self.segment.get_sync_index()} "
-                  "in {self.segment.get_write_index()}")
+            print(f"No key found {self.segment.get_sync_index()} in {self.segment.get_write_index()}")
             return False
 
         key, _ = self.segment.read()
