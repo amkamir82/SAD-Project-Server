@@ -63,6 +63,7 @@ def subscribe():
     tmp_subscriptions = {}
     all_subscribers_length = len(all_subscribers)
     all_brokers_length = len(all_brokers)
+    print("######all subscribers\n", all_subscribers)
     ex = all_subscribers_length // all_brokers_length
     print("###########ex ", ex)
     j = 0
