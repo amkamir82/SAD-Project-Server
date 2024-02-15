@@ -22,11 +22,13 @@ class Read:
     _instance = None
 
     def __new__(cls, partition: str, replica: str):
-        if cls._instance is None or (cls._instance.replica is None and replica is not None):
+        if cls._instance is None:
             with cls._instances_lock:
                 if cls._instance is None:
                     cls._instance = super().__new__(cls)
                     cls._instance.replica = replica
+        if replica is not None and cls._instance.replica is None:
+            cls._instance.segment = Segment(partition, replica)
         return cls._instance
 
     def __init__(self, partition: str, replica: str):
