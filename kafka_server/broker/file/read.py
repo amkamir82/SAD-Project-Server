@@ -11,7 +11,6 @@ from file.hash import hash_md5
 from file.segment import Segment
 from manager.env import get_partition_count
 
-
 BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
 sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
 
@@ -116,8 +115,7 @@ class Read:
 
     def check_data_exist(self):
         if self.segment.get_read_index() >= self.segment.get_write_index():
-            print(f"No key found {self.segment.get_read_index()} "
-                  f"in {self.segment.get_write_index()}")
+            print(f"No key found {self.segment.get_read_index()} in {self.segment.get_write_index()}")
             return False
 
         key, _ = self.segment.read()
