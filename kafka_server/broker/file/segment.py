@@ -34,11 +34,11 @@ class Segment:
                 data_file_path = os.path.join(segment_path, f'{self.indexer.get_write()}.dat')
                 kb = 1024
 
-                with open(data_file_path, 'wb+') as entry_file:
-                    entry_file.write(f'{key}: '.encode('utf-8'))
+                with open(data_file_path, 'w') as entry_file:
+                    entry_file.write(f'{key}: ')
                     for i in range(0, len(value), kb):
                         chunk = value[i:i + kb]
-                        entry_file.write(chunk)
+                        entry_file.write(chunk.decode('utf-8'))
         except Exception as e:
             print(f"Error appending data to segment: {e}")
             return False
@@ -81,10 +81,10 @@ class Segment:
 
         if os.path.exists(data_file_path):  # TODO: get lock
             try:
-                with open(data_file_path, 'rb') as entry_file:
+                with open(data_file_path, 'r') as entry_file:
                     data = entry_file.read()
 
-                    key, value = data.decode('utf-8').split(': ', 1)
+                    key, value = data.split(': ', 1)
                     return key, value
             except Exception as e:
                 print(f"Error reading file {data_file_path}: {e}")
