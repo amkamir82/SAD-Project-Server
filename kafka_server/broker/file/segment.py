@@ -54,6 +54,7 @@ class Segment:
     def approve_reading(self):
         try:
             with self._read_lock:
+                print("approve_reading \n\n")
                 self.indexer.inc_read()
         except Exception as e:
             print(f"Error inc read index: {e}")
