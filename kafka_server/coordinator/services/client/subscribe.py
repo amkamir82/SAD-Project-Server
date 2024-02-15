@@ -17,9 +17,13 @@ def update_brokers_subscription_plan():
         raise Exception("Error during getting list of brokers from database")
     for broker_url in all_subscriptions.keys():
         data = all_subscriptions[broker_url]
+        t = {}
+        for sub in data:
+            t[sub[0]] = sub[1]
+
         response = requests.post(
-            f"http://{broker_url}/subscription-plan",
-            data=json.dumps({"subscription_plans": data}),
+            f"{broker_url[2:]}/subscribers",
+            data=json.dumps({"subscribers": t}),
             timeout=2,
         )
         if response.status_code != 200:
@@ -27,29 +31,36 @@ def update_brokers_subscription_plan():
 
 
 def check_heartbeat():
-    response = requests.get(
-        'http://127.0.0.1:5001/client/list_all_heartbeats',
-        timeout=2,
-    )
-    data = response.json()
+    try:
+        print("##############checing heartbeats")
+        response = requests.get(
+            'http://127.0.0.1:5001/client/list_all_heartbeats',
+            timeout=2,
+        )
+        data = response.json()
+        print(data)
+        if len(data) == 0:
+            return
+        for key in data.keys():
+            datetime_seconds = float(data[key])
+            diff_seconds = datetime.now().timestamp() - datetime_seconds
+            if diff_seconds > 30:
+                print("##############delete client heartbeat")
+                requests.post(
+                    "http://127.0.0.1:5001/client/delete_heartbeat",
+                    data=json.dumps({"client_url": key}),
+                    timeout=2,
+                )
 
-    if len(data) == 0:
-        return
-    for key in data.keys():
-        datetime_seconds = float(data[key])
-        diff_seconds = datetime.now().timestamp() - datetime_seconds
-        if diff_seconds > 30:
-            requests.post(
-                "http://127.0.0.1:5001/client/delete_heartbeat",
-                data=json.dumps({"client_url": key}),
-                timeout=2,
-            )
-            requests.post(
-                "http://127.0.0.1:5001/subscribe/delete",
-                data=json.dumps({"client_url": key}),
-                timeout=2,
-            )
-            # update_brokers_subscription_plan()
+                print("##############delete all subscriptions for client")
+                requests.post(
+                    "http://127.0.0.1:5001/subscribe/delete",
+                    data=json.dumps({"client_url": key}),
+                    timeout=2,
+                )
+                update_brokers_subscription_plan()
+    except Exception as e:
+        print(str(e))
 
 
 def run_check_heartbeat_job():

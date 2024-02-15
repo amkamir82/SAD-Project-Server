@@ -67,9 +67,9 @@ jobs:
       matrix:
         python-version: ["3.8", "3.9", "3.10"]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
@@ -89,10 +89,10 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: 3.x
 
@@ -112,7 +112,7 @@ jobs:
 
     steps:
     - name: checkout repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     
     - name: set up ssh keys
       uses: shimataro/ssh-key-action@v2
@@ -122,8 +122,6 @@ jobs:
     - name: connect and pull
       run: |
         ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker-compose up -d broker-1 broker-2 broker-3 && exit"
-    - name: cleanup
-      run: rm ~/.ssh/id_rsa
 
   deploy-prod-coordinator:
     name: Deploy Coordinator to Production
@@ -132,7 +130,7 @@ jobs:
 
     steps:
     - name: checkout repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     
     - name: set up ssh keys
       uses: shimataro/ssh-key-action@v2
@@ -143,5 +141,3 @@ jobs:
       run: |
         ls
         ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker-compose up -d coordinator-1 coordinator-2 && exit"
-    - name: cleanup
-      run: rm ~/.ssh/id_rsa

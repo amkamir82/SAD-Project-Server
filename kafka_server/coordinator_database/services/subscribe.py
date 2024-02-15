@@ -55,3 +55,12 @@ def get_all_subscriptions():
             json_data = json.load(f)
 
     return json_data["subscriptions"]
+
+
+def write_subscriptions(subscriptions):
+    with lock:
+        json_data = {}
+        with open(config.SUBSCRIBER_DATABASE_FILE_PATH, 'w', encoding='utf8') as f:
+            json_data["subscriptions"] = subscriptions
+            f.write(json.dumps(json_data))
+            f.close()

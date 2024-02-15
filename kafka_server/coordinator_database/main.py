@@ -48,9 +48,10 @@ def list_brokers():
 def delete_broker():
     data = json.loads(request.data.decode('utf-8'))
     broker_id = data['broker_id']
-    thread = threading.Thread(target=broker.delete_broker, args=(broker_id,))
-    thread.start()
-    return jsonify({"message": "Broker successfully deleted"}), 200
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        future = executor.submit(broker.delete_broker, broker_id)
+        _ = future.result()
+    return jsonify("Successfully deleted")
 
 
 @app.route('/broker/get_replica', methods=['GET'])
@@ -192,6 +193,20 @@ def list_of_replicas():
             logger.error(e)
             return jsonify("Error deleting broker heartbeat"), 500
     return jsonify(result), 200
+
+
+@app.route('/subscribe/write_subscriptions', methods=['POST'])
+def write_subscriptions():
+    data = json.loads(request.data.decode('utf-8'))
+    data = data["subscriptions"]
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        try:
+            future = executor.submit(subscribe.write_subscriptions, data)
+            _ = future.result()
+        except Exception as e:
+            logger.error(e)
+            return jsonify("Error deleting broker heartbeat"), 500
+    return jsonify("Successfully write subscriptions"), 200
 
 
 if __name__ == '__main__':

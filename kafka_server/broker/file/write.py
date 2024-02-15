@@ -32,7 +32,7 @@ class Write:
         with self._write_lock:
             md5 = hash_md5(key)
             partition_count = get_partition_count()
-            if int(md5, 16) % partition_count != (int(self.partition) - 1 % partition_count):
+            if int(md5, 16) % partition_count != int(self.partition) - 1:
                 raise Exception(f"key is not for this partition, fuck {md5} {key} {partition_count}")
 
             appended = self.segment.append(key, value)
