@@ -53,6 +53,7 @@ class Read:
     def read_data(self):
         self.subscribers = self.get_subscribers()
         if len(self.subscribers) == 0:
+            print("No subscribers")
             return None, None
         self.load_message_in_fly()
         if self.message_in_fly:
