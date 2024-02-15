@@ -171,8 +171,10 @@ def update_subscribers():
     for broker_id in all_brokers.keys():
         print(broker_id)
         t = {}
-        for sub in tmp_subscriptions[f"{broker_id}:{all_brokers[broker_id]}"]:
-            t[sub[1]] = sub[0]
+        print(tmp_subscriptions)
+        if f"{broker_id}:{all_brokers[broker_id]}" in tmp_subscriptions.keys():
+            for sub in tmp_subscriptions[f"{broker_id}:{all_brokers[broker_id]}"]:
+                t[sub[1]] = sub[0]
         print("##########send subscriptions to broker")
         print(t)
         send_subscribe_to_broker(all_brokers[broker_id], t)
