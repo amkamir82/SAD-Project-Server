@@ -35,15 +35,17 @@ class Sync:
         print("Syncing data... partition ", self.partition)
         if not self.check_data_exist():
             return None, None
+        print("data exist to sync")
 
         with self._sync_lock:
             key, value = self.segment.read()
             md5 = hash_md5(key)
             partition_count = get_partition_count()
             broker_id = int(md5, 16) % partition_count
-            if broker_id == int(self.partition) - 1:
+            if broker_id == (int(self.partition) - 1) % partition_count:
                 self.segment.approve_sync()
                 return self.sync_data()
+            print("send sync data to broker", broker_id)
 
             sent = self.send_to_broker(key, value, broker_id)
             if sent:
