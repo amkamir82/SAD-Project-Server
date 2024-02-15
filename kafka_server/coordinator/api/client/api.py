@@ -60,6 +60,7 @@ def subscribe():
         for sub in all_subscriptions[broker_id_url]:
             all_subscribers.append(sub)
 
+    print("######all subscriber before\n", all_subscribers)
     unique_tuples = set(tuple(x) for x in all_subscribers)
     all_subscribers = [list(x) for x in unique_tuples]
 
