@@ -61,6 +61,7 @@ def subscribe():
         for sub in all_subscriptions[broker_id_url]:
             all_subscribers.add(sub)
 
+    all_subscribers = list(all_subscribers)
     tmp_subscriptions = {}
     all_subscribers_length = len(all_subscribers)
     all_brokers_length = len(all_brokers)
