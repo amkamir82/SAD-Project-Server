@@ -36,7 +36,7 @@ def write():
         # Assuming the request body is in JSON format with 'key' and 'value' fields
         data = request.get_json()
         key = data.get('key')
-        value = data.get('value').encode('utf-8')
+        value = data.get('value')
         print(key, value)
 
         write_instance = Write(get_primary_partition(), get_replica_url())
