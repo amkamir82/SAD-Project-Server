@@ -72,7 +72,6 @@ class Segment:
 
     def read(self):
         read_index = self.indexer.get_read()
-        print("read_index", read_index)
         segment_path = self.read_segment_path()
 
         data_file_path = os.path.join(segment_path, f'{read_index}.dat')

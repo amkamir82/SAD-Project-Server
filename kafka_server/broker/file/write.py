@@ -15,9 +15,9 @@ class Write:
     _write_lock = threading.Lock()
 
     def __new__(cls, partition: str, replica: str = None):
-        if partition not in cls._instances:
-            cls._instances[partition] = super(Write, cls).__new__(cls)
-        return cls._instances[partition]
+        if f"{partition}-{replica}" not in cls._instances:
+            cls._instances[f"{partition}-{replica}"] = super(Write, cls).__new__(cls)
+        return cls._instances[f"{partition}-{replica}"]
 
     def __init__(self, partition: str, replica: str):
         if hasattr(self, 'initialized'):
@@ -50,6 +50,10 @@ class Write:
             return self.segment.approve_appending()
 
     def send_to_replica(self, key: str, value: str) -> bool:
+        if self.replica is None:
+            print("replica is None, skip it")
+            return True
+
         url = f'{self.replica}/replica/data'
         response = requests.post(
             url,
