@@ -86,10 +86,12 @@ class Read:
         if self.message_in_fly:
             print("there is message in fly")
             return None, None
+        print("there is no message in fly", flush=True)
         if not self.check_data_exist():
             return None, None
 
         with self._read_lock:
+            print("start pulling data", flush=True)
             key, value = self.segment.read()
 
             md5 = hash_md5(key)
