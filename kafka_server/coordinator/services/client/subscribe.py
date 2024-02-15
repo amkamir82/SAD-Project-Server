@@ -18,7 +18,7 @@ def update_brokers_subscription_plan():
 
         response = requests.post(
             f"{broker_url[2:]}/subscribers",
-            data=json.dumps({"subscribers": data}),
+            data=json.dumps({"subscribers": t}),
             timeout=2,
         )
         if response.status_code != 200:
