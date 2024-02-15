@@ -18,13 +18,14 @@ class Segment:
 
     def __new__(cls, partition: str, replica: str):
         with cls._instances_lock:
-            if partition not in cls._instances:
-                cls._instances[partition] = super(Segment, cls).__new__(cls)
-                cls._instances[partition].partition = partition
-                cls._instances[partition].indexer = Indexer(partition, replica)
-            return cls._instances[partition]
+            if f"{partition}-{replica}" not in cls._instances:
+                cls._instances[f"{partition}-{replica}"] = super(Segment, cls).__new__(cls)
+                cls._instances[f"{partition}-{replica}"].partition = partition
+                cls._instances[f"{partition}-{replica}"].indexer = Indexer(partition, replica)
 
-    def append(self, key: str, value: bytes):
+            return cls._instances[f"{partition}-{replica}"]
+
+    def append(self, key: str, value: str):
         try:
             with self._append_lock:
                 segment_path = self.write_segment_path()
@@ -32,19 +33,14 @@ class Segment:
                     os.makedirs(segment_path, exist_ok=True)
 
                 data_file_path = os.path.join(segment_path, f'{self.indexer.get_write()}.dat')
-                kb = 1024
 
-                with open(data_file_path, 'wb+') as entry_file:
-                    entry_file.write(f'{key}: '.encode('utf-8'))
-                    for i in range(0, len(value), kb):
-                        chunk = value[i:i + kb]
-                        entry_file.write(chunk)
+                with open(data_file_path, 'w') as entry_file:
+                    entry_file.write(f'{key}: {value}')
         except Exception as e:
             print(f"Error appending data to segment: {e}")
             return False
         return True
 
-        # self.indexer.inc_write()
 
     def approve_appending(self):
         try:
@@ -81,10 +77,10 @@ class Segment:
 
         if os.path.exists(data_file_path):  # TODO: get lock
             try:
-                with open(data_file_path, 'rb') as entry_file:
+                with open(data_file_path, 'r') as entry_file:
                     data = entry_file.read()
 
-                    key, value = data.decode('utf-8').split(': ', 1)
+                    key, value = data.split(': ', 1)
                     return key, value
             except Exception as e:
                 print(f"Error reading file {data_file_path}: {e}")

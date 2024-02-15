@@ -1,17 +1,18 @@
 import datetime
 import json
 import os
-import random
+from random import SystemRandom
 import sys
-
-from coordinator.services.broker import subscribe as broker_subscribe_service
-from coordinator.services.client import database as client_database
-from coordinator.services.broker import database as broker_database
-from flask import Blueprint, request, jsonify
 
 COORDINATOR_PROJECT_PATH = os.getenv("COORDINATOR_PROJECT_PATH", "/app/")
 sys.path.append(os.path.abspath(COORDINATOR_PROJECT_PATH))
 
+from services.broker import subscribe as broker_subscribe_service
+from services.client import database as client_database
+from services.broker import database as broker_database
+from flask import Blueprint, request, jsonify
+
+cryptogen = SystemRandom()
 api_blueprint = Blueprint('api', __name__)
 
 
@@ -45,7 +46,7 @@ def subscribe():
     data = json.loads(request.data.decode('utf-8'))
     client_addr = f'http://{data["ip"]}:{data["port"]}'
 
-    random_id = random.randint(1, 1000000)
+    random_id = cryptogen.randint(1, 1000000)
 
     response_code, all_subscriptions = broker_subscribe_service.get_all_subscriptions()
     print("################allllll subscriptions\n", all_subscriptions)

@@ -2,18 +2,20 @@ import json
 import os
 import sys
 import threading
-from main import init
+
+
+BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
+sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
+
 from file.indexer import Indexer
 from file.read import Read
 from file.write import Write
+from main import init
 from flask import Flask, request, jsonify
 from manager.env import get_primary_partition, get_replica_url
 from metrics import coordinator_write_requests, coordinator_replicate_index_requests
 from prometheus_client import make_wsgi_app
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
-
-BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
-sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
 
 
 app = Flask(__name__)
@@ -34,7 +36,7 @@ def write():
         # Assuming the request body is in JSON format with 'key' and 'value' fields
         data = request.get_json()
         key = data.get('key')
-        value = data.get('value').encode('utf-8')
+        value = data.get('value')
         print(key, value)
 
         write_instance = Write(get_primary_partition(), get_replica_url())
@@ -98,7 +100,7 @@ def subscription():
         data = json.loads(request.data.decode("utf-8"))
         brokers = data['brokers']
 
-        brokers_file_path = os.path.join(os.getcwd(), '../data', 'subscriptions', 'brokers.json')
+        brokers_file_path = os.path.join(os.getcwd(), 'data', 'subscriptions', 'brokers.json')
 
         with open(brokers_file_path, "w") as file:
             json.dump(brokers, file)
@@ -120,7 +122,7 @@ def subscribers():
         data = json.loads(request.data.decode("utf-8"))
         brokers = data['subscribers']
 
-        subscribers_file_path = os.path.join(os.getcwd(), '../data', 'subscriptions', 'subscribers.json')
+        subscribers_file_path = os.path.join(os.getcwd(), 'data', 'subscriptions', 'subscribers.json')
 
         with open(subscribers_file_path, "w+") as file:
             json.dump(brokers, file)
@@ -182,4 +184,5 @@ crun = threading.Thread(target=init)
 crun.daemon = True
 crun.start()
 
-app.run('0.0.0.0', port=5003, debug=True)
+broker_listening_addr = '0.0.0.0'
+app.run(broker_listening_addr, port=5003)

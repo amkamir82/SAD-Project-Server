@@ -13,17 +13,15 @@ class Indexer:
 
     def __new__(cls, partition: str, replica: str = None):
         with cls._lock:
-            if partition not in cls._instances:
-                cls._instances[partition] = super().__new__(cls)
-                cls._instances[partition].partition = partition
-                cls._instances[partition].replica = replica
-                cls._instances[partition]._write = 0
-                cls._instances[partition]._read = 0
-                cls._instances[partition]._sync = 0
-                cls._instances[partition].load()
-                path = cls._instances[partition].__dir_path()
+            if f"{partition}-{replica}" not in cls._instances:
+                cls._instances[f"{partition}-{replica}"] = super().__new__(cls)
+                cls._instances[f"{partition}-{replica}"].partition = partition
+                cls._instances[f"{partition}-{replica}"].replica = replica
+                cls._instances[f"{partition}-{replica}"].load()
+                path = cls._instances[f"{partition}-{replica}"].__dir_path()
                 os.makedirs(path, exist_ok=True)
-            return cls._instances[partition]
+
+            return cls._instances[f"{partition}-{replica}"]
 
     def load(self):
         self._write = self._load_variable('write')
@@ -106,9 +104,12 @@ class Indexer:
 
     def send_to_replica(self):
         if self.replica is None:
+            print("No replica found /n/n/n")
             return
+
         url = f'{self.replica}/replica/index'
         data = {'partition': self.partition, 'read': self._read, 'sync': self._sync}
+        print(data, "to Replica")
         response = requests.post(url, json=data, timeout=2)
         if response.status_code != 200:
             raise Exception(f'indexed not yet updated {response}')

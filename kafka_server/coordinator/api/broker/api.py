@@ -2,17 +2,18 @@ import datetime
 import json
 import os
 import sys
-import random
-
-from coordinator.services.broker import subscribe as broker_subscriber_service
-from coordinator.services.broker import database as broker_database
-from coordinator import config
-from flask import Blueprint, jsonify, request
+from random import SystemRandom
 
 COORDINATOR_PROJECT_PATH = os.getenv("COORDINATOR_PROJECT_PATH", "/app/")
 sys.path.append(os.path.abspath(COORDINATOR_PROJECT_PATH))
+from services.broker import subscribe as broker_subscriber_service
+from services.broker import database as broker_database
+import config
+from flask import Blueprint, jsonify, request
+
 
 api_blueprint = Blueprint('api', __name__)
+cryptogen = SystemRandom()
 
 
 @api_blueprint.route('/init', methods=['GET'])
@@ -35,7 +36,7 @@ def init_broker():
     replica_url = None
     if broker_id not in all_brokers_replicas:
         keys = all_brokers.keys()
-        key = random.choice(list(keys))
+        key = cryptogen.choice(list(keys))
         replica_url = all_brokers[key]
         response_code = broker_database.add_replica_for_broker(broker_id, replica_url)
         if response_code != 200:

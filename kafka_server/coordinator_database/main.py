@@ -50,7 +50,7 @@ def delete_broker():
     broker_id = data['broker_id']
     with concurrent.futures.ThreadPoolExecutor() as executor:
         future = executor.submit(broker.delete_broker, broker_id)
-        result = future.result()
+        _ = future.result()
     return jsonify("Successfully deleted")
 
 

@@ -11,7 +11,6 @@ from file.hash import hash_md5
 from file.segment import Segment
 from manager.env import get_partition_count
 
-
 BROKER_PROJECT_PATH = os.getenv("BROKER_PROJECT_PATH", "/app/")
 sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
 
@@ -19,22 +18,23 @@ sys.path.append(os.path.abspath(BROKER_PROJECT_PATH))
 class Read:
     _instances_lock = threading.Lock()
     _read_lock = threading.Lock()
-    _instance = None
+    _instances = {}
 
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
+    def __new__(cls, partition: str, replica: str):
+        if f"{partition}-{replica}" not in cls._instances:
             with cls._instances_lock:
-                if cls._instance is None:
-                    cls._instance = super().__new__(cls)
-        return cls._instance
+                cls._instances[f"{partition}-{replica}"] = super().__new__(cls)
+
+        return cls._instances[f"{partition}-{replica}"]
 
     def __init__(self, partition: str, replica: str):
         if not hasattr(self, 'initialized'):
+            self.subscribers = None
             self.partition = partition
             self.message_in_fly = False
             self.message_in_fly_since = datetime.now()
             self.segment = Segment(partition, replica)
-            self.subscribers = self.get_subscribers()
+
             self.initialized = True
 
             self.toggle_thread = threading.Thread(target=self.toggle_message_in_fly)
@@ -51,7 +51,9 @@ class Read:
             time.sleep(5)
 
     def read_data(self):
+        self.subscribers = self.get_subscribers()
         if len(self.subscribers) == 0:
+            print("No subscribers")
             return None, None
         self.load_message_in_fly()
         if self.message_in_fly:
@@ -65,6 +67,7 @@ class Read:
             md5 = hash_md5(key)
             partition_count = get_partition_count()
             if int(md5, 16) % partition_count != int(self.partition) - 1:
+                print("data for other partition", flush=True)
                 self.segment.approve_reading()
                 return self.read_data()
 
@@ -85,10 +88,12 @@ class Read:
         if self.message_in_fly:
             print("there is message in fly")
             return None, None
+        print("there is no message in fly", flush=True)
         if not self.check_data_exist():
             return None, None
 
         with self._read_lock:
+            print("start pulling data", flush=True)
             key, value = self.segment.read()
 
             md5 = hash_md5(key)
@@ -104,14 +109,13 @@ class Read:
     def ack_message(self):
         if self.message_in_fly:
             with self._read_lock:
-                self.segment.approve_reading()
                 self.message_in_fly = False
                 self.save_message_in_fly()
+                self.segment.approve_reading()
 
     def check_data_exist(self):
         if self.segment.get_read_index() >= self.segment.get_write_index():
-            print(f"No key found {self.segment.get_read_index()} "
-                  f"in {self.segment.get_write_index()}")
+            print(f"No key found {self.segment.get_read_index()} in {self.segment.get_write_index()}")
             return False
 
         key, _ = self.segment.read()
@@ -125,18 +129,18 @@ class Read:
     def get_subscribers():
         subscriptions_file_path = os.path.join(
             os.getcwd(),
-            '../data',
+            'data',
             'subscriptions',
             'subscribers.json'
         )
         if not os.path.exists(subscriptions_file_path):
+            print("No subscriptions file found")
             return []
 
         with open(subscriptions_file_path, 'r', encoding='utf8') as f:
             subscribers = json.load(f)
+            print("Found {} subscribers".format(subscribers))
 
-        if len(subscribers) == 0:
-            raise Exception('No subscribers found')
         return subscribers
 
     def send_to_subscriber(self, key: str, value: str) -> bool:
@@ -146,6 +150,9 @@ class Read:
 
         try:
             response = requests.post(url, json={'key': key, 'value': value}, timeout=2)
+            if response.status_code != 200:
+                print(response.json(), response.content, response.status_code)
+
             return response.status_code == 200
         except Exception as e:
             print(e)
@@ -157,6 +164,7 @@ class Read:
         id_to_key = {}
         for i, key in enumerate(self.subscribers.keys()):
             id_to_key[i] = key
+
         chosen_key = id_to_key[read_index % subscriber_count]
         return chosen_key, self.subscribers[chosen_key]
 
@@ -165,7 +173,6 @@ class Read:
         if os.path.exists(message_file_path):
             with open(message_file_path, 'r', encoding='utf8') as f:
                 data = json.load(f)
-                print(data)
                 self.message_in_fly = data.get('message_in_fly', False)
                 self.message_in_fly_since = datetime.fromisoformat(
                     data.get('message_in_fly_since', datetime.now().isoformat()))

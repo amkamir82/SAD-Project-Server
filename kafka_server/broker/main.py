@@ -38,10 +38,10 @@ def init_broker():
 
 
 def init():
-    os.makedirs(os.path.join(os.getcwd(), '../data'), exist_ok=True)
-    os.makedirs(os.path.join(os.getcwd(), '../data', 'subscriptions'), exist_ok=True)
-    os.makedirs(os.path.join(os.getcwd(), '../data', 'partition_data'), exist_ok=True)
-    os.makedirs(os.path.join(os.getcwd(), '../data', 'partition_index'), exist_ok=True)
+    os.makedirs(os.path.join(os.getcwd(), 'data'), exist_ok=True)
+    os.makedirs(os.path.join(os.getcwd(), 'data', 'subscriptions'), exist_ok=True)
+    os.makedirs(os.path.join(os.getcwd(), 'data', 'partition_data'), exist_ok=True)
+    os.makedirs(os.path.join(os.getcwd(), 'data', 'partition_index'), exist_ok=True)
     init_broker()
     read_thread = threading.Thread(target=schedule_read_thread)
     read_thread.daemon = True
@@ -51,8 +51,12 @@ def init():
     heartbeat_thread.daemon = True
     heartbeat_thread.start()
 
-    # sync_thread = threading.Thread(target=schedule_sync_thread)
-    # sync_thread.daemon = True
-    # sync_thread.start()
+    sync_thread = threading.Thread(target=schedule_sync_thread)
+    sync_thread.daemon = True
+    sync_thread.start()
+
+    sync_replica_thread = threading.Thread(target=sync_replica)
+    sync_replica_thread.daemon = True
+    sync_replica_thread.start()
 
     schedule.run_pending()

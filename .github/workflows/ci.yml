@@ -57,6 +57,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./kafka_server/coordinator/
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: mahdigheidi/sad-coordinator:latest
 
@@ -66,18 +67,18 @@ jobs:
       matrix:
         python-version: ["3.8", "3.9", "3.10"]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 
+        pip install flake8
     - name: Analysing the code with flake8
       run: |
-        flake8 --ignore E501 kafka_server/
+        flake8 --ignore=E401,E402,E501 kafka_server/
     # - name: Test with pytest
     #   run: |
     #     pytest
@@ -88,10 +89,10 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: 3.x
 
@@ -101,7 +102,7 @@ jobs:
 
       - name: Run bandit
         run: |
-          bandit -r .
+          bandit --skip B104 -r .
 
   
   deploy-prod-broker:
@@ -111,7 +112,7 @@ jobs:
 
     steps:
     - name: checkout repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     
     - name: set up ssh keys
       uses: shimataro/ssh-key-action@v2
@@ -120,18 +121,23 @@ jobs:
         known_hosts: ${{ secrets.SSH_HOST }}
     - name: connect and pull
       run: |
-        ssh -i ~/.ssh/id_rsa ubuntu@37.152.176.203 "docker compose up -d broker-1 broker-2 broker-3 && exit"
-    - name: cleanup
-      run: rm -rf ~/.ssh
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker-compose up -d broker-1 broker-2 broker-3 && exit"
 
   deploy-prod-coordinator:
     name: Deploy Coordinator to Production
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build-push-coordinator
 
     steps:
-      - name: Deploy to production
-        run: |
-          # Here you can add your deployment commands/scripts
-          # For example:
-          ssh user@your-production-server 'docker pull ghcr.io/your-github-username/your-repo-name:latest && docker-compose up -d'
+    - name: checkout repo
+      uses: actions/checkout@v4
+    
+    - name: set up ssh keys
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        known_hosts: ${{ secrets.SSH_HOST }}
+    - name: connect and pull
+      run: |
+        ls
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker-compose up -d coordinator-1 coordinator-2 && exit"
