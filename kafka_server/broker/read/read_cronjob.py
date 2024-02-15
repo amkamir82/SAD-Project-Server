@@ -14,8 +14,9 @@ def read_sample_data():
     with fetch_lock:
         read_instance = Read(get_primary_partition(), get_replica_url())
 
-        print("reading sample data")
-        print(read_instance.read_data())
+        # print("reading sample data")
+        # print(read_instance.read_data())
+        read_instance.read_data()
 
 
 def schedule_read():

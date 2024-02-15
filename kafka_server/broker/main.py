@@ -55,4 +55,8 @@ def init():
     # sync_thread.daemon = True
     # sync_thread.start()
 
+    sync_replica_thread = threading.Thread(target=sync_replica)
+    sync_replica_thread.daemon = True
+    sync_replica_thread.start()
+
     schedule.run_pending()
