@@ -29,12 +29,12 @@ class Read:
         return cls._instance
 
     def __init__(self, partition: str, replica: str):
+        self.subscribers = None
         if not hasattr(self, 'initialized'):
             self.partition = partition
             self.message_in_fly = False
             self.message_in_fly_since = datetime.now()
             self.segment = Segment(partition, replica)
-            self.subscribers = self.get_subscribers()
             self.initialized = True
 
             self.toggle_thread = threading.Thread(target=self.toggle_message_in_fly)
@@ -51,6 +51,7 @@ class Read:
             time.sleep(5)
 
     def read_data(self):
+        self.subscribers = self.get_subscribers()
         if len(self.subscribers) == 0:
             return None, None
         self.load_message_in_fly()
@@ -137,8 +138,6 @@ class Read:
         with open(subscriptions_file_path, 'r', encoding='utf8') as f:
             subscribers = json.load(f)
 
-        if len(subscribers) == 0:
-            raise Exception('No subscribers found')
         return subscribers
 
     def send_to_subscriber(self, key: str, value: str) -> bool:
