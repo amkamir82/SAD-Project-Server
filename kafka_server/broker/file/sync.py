@@ -78,11 +78,13 @@ class Sync:
         return brokers
 
     def send_to_broker(self, key: str, value: str, broker_id: int) -> bool:
-        broker_list = []
-        for k in self.brokers.keys():
-            broker_list.append([k, self.brokers[k]])
+        broker = []
+        for broker_idd, broker_url in self.brokers:
+            if int(hash_md5(key), 16) % get_partition_count() == (int(broker_idd) - 1) % get_partition_count():
+                broker = broker_url
 
-        url = f'{broker_list[broker_id][1]}/write'
+
+        url = f'{broker}/write'
         print(f"sync {key} to {url}", flush=True)
 
         try:
