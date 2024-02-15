@@ -94,7 +94,7 @@ def subscribe():
     if response_code != 200:
         return jsonify("Error during finding broker for subscribe"), response_code
 
-    return jsonify(all_brokers_for_client), 200
+    return jsonify({"id": random_id}), 200
 
     # min_length = 1000000
     # selected_broker_id = None
