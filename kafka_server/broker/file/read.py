@@ -29,15 +29,18 @@ class Read:
         return cls._instances[f"{partition}-{replica}"]
 
     def __init__(self, partition: str, replica: str):
-        self.subscribers = None
-        self.partition = partition
-        self.message_in_fly = False
-        self.message_in_fly_since = datetime.now()
-        self.segment = Segment(partition, replica)
+        if not hasattr(self, 'initialized'):
+            self.subscribers = None
+            self.partition = partition
+            self.message_in_fly = False
+            self.message_in_fly_since = datetime.now()
+            self.segment = Segment(partition, replica)
 
-        self.toggle_thread = threading.Thread(target=self.toggle_message_in_fly)
-        self.toggle_thread.daemon = True
-        self.toggle_thread.start()
+            self.initialized = True
+
+            self.toggle_thread = threading.Thread(target=self.toggle_message_in_fly)
+            self.toggle_thread.daemon = True
+            self.toggle_thread.start()
 
     def toggle_message_in_fly(self):
         while True:
@@ -107,9 +110,9 @@ class Read:
     def ack_message(self):
         if self.message_in_fly:
             with self._read_lock:
-                self.segment.approve_reading()
                 self.message_in_fly = False
                 self.save_message_in_fly()
+                self.segment.approve_reading()
 
     def check_data_exist(self):
         if self.segment.get_read_index() >= self.segment.get_write_index():
