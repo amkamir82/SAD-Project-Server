@@ -207,4 +207,4 @@ def check_heartbeat():
 
 def run_check_heartbeat_job():
     check_heartbeat()
-    threading.Timer(10, run_check_heartbeat_job).start()
+    threading.Timer(8, run_check_heartbeat_job).start()

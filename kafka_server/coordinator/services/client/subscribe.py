@@ -39,7 +39,7 @@ def check_heartbeat():
         for key in data.keys():
             datetime_seconds = float(data[key])
             diff_seconds = datetime.now().timestamp() - datetime_seconds
-            if diff_seconds > 30:
+            if diff_seconds > 15:
                 print("##############delete client heartbeat")
                 requests.post(
                     "http://127.0.0.1:5001/client/delete_heartbeat",
@@ -60,4 +60,4 @@ def check_heartbeat():
 
 def run_check_heartbeat_job():
     check_heartbeat()
-    threading.Timer(10, run_check_heartbeat_job).start()
+    threading.Timer(8, run_check_heartbeat_job).start()
