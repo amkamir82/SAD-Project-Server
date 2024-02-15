@@ -167,7 +167,9 @@ def update_subscribers():
 
     print("####aghaei2\n", tmp_subscriptions)
 
+    print("$$$brokers\n", all_brokers)
     for broker_id in all_brokers.keys():
+        print(broker_id)
         t = {}
         for sub in tmp_subscriptions[f"{broker_id}:{all_brokers[broker_id]}"]:
             t[sub[1]] = sub[0]
