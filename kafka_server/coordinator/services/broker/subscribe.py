@@ -117,7 +117,6 @@ def update_brokers_list(broker_url):
             if response.status_code != 200:
                 print(f"Error during sending subscription to broker #{broker_url}")
     prepare_updating(all_brokers, down_broker_id, broker_url)
-    update_brokers_subscriptions()
 
 
 def update_subscribers():
