@@ -12,9 +12,13 @@ def update_brokers_subscription_plan():
         raise Exception("Error during getting list of brokers from database")
     for broker_url in all_subscriptions.keys():
         data = all_subscriptions[broker_url]
+        t = {}
+        for sub in data:
+            t[sub[0]] = sub[1]
+
         response = requests.post(
-            f"http://{broker_url}/subscription-plan",
-            data=json.dumps({"subscription_plans": data}),
+            f"http://{broker_url}/subscribers",
+            data=json.dumps({"subscribers": data}),
             timeout=2,
         )
         if response.status_code != 200:
@@ -49,7 +53,7 @@ def check_heartbeat():
                     data=json.dumps({"client_url": key}),
                     timeout=2,
                 )
-                # update_brokers_subscription_plan()
+                update_brokers_subscription_plan()
     except Exception as e:
         print(str(e))
 

@@ -57,7 +57,7 @@ def subscribe():
 
     all_subscribers = [[client_addr, random_id]]
     for broker_id_url in all_subscriptions.keys():
-        for sub in all_subscribers[broker_id_url]:
+        for sub in all_subscriptions[broker_id_url]:
             all_subscribers.append(sub)
 
     tmp_subscriptions = {}
