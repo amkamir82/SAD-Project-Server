@@ -10,4 +10,4 @@ scrape_configs:
   - job_name: 'coordinator'
     scrape_interval: 5s
     static_configs:
-      - targets: ['coordinator:5000']
+      - targets: ['coordinator-1:5000', 'coordinator-2:5000']

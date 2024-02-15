@@ -19,9 +19,9 @@ class Sync:
     _instances = {}
 
     def __new__(cls, partition: str, replica: str):
-        if f"{partition}-{replica}" not in  cls._instances:
+        if f"{partition}-{replica}" not in cls._instances:
             with cls._instances_lock:
-                    cls._instances[f"{partition}-{replica}"] = super().__new__(cls)
+                cls._instances[f"{partition}-{replica}"] = super().__new__(cls)
         return cls._instances[f"{partition}-{replica}"]
 
     def __init__(self, partition: str, replica: str):
