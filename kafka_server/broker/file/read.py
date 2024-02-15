@@ -21,25 +21,24 @@ class Read:
     _read_lock = threading.Lock()
     _instance = None
 
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
+    def __new__(cls, partition: str, replica: str):
+        if cls._instance is None or (cls._instance.replica is None and replica is not None):
             with cls._instances_lock:
                 if cls._instance is None:
                     cls._instance = super().__new__(cls)
+                    cls._instance.replica = replica
         return cls._instance
 
     def __init__(self, partition: str, replica: str):
         self.subscribers = None
-        if not hasattr(self, 'initialized'):
-            self.partition = partition
-            self.message_in_fly = False
-            self.message_in_fly_since = datetime.now()
-            self.segment = Segment(partition, replica)
-            self.initialized = True
+        self.partition = partition
+        self.message_in_fly = False
+        self.message_in_fly_since = datetime.now()
+        self.segment = Segment(partition, replica)
 
-            self.toggle_thread = threading.Thread(target=self.toggle_message_in_fly)
-            self.toggle_thread.daemon = True
-            self.toggle_thread.start()
+        self.toggle_thread = threading.Thread(target=self.toggle_message_in_fly)
+        self.toggle_thread.daemon = True
+        self.toggle_thread.start()
 
     def toggle_message_in_fly(self):
         while True:
