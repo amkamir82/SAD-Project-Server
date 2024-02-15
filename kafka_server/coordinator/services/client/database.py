@@ -37,3 +37,11 @@ def update_heartbeat_status(client_url, time):
         timeout=2,
     )
     return r.status_code
+
+
+def list_all_client_heartbeats():
+    response = requests.get(
+        'http://127.0.0.1:5001/client/list_all_heartbeats',
+        timeout=2,
+    )
+    return response.status_code, response.json()

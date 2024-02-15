@@ -33,13 +33,13 @@ def update_brokers_subscriptions():
     if response_code != 200:
         raise Exception("Error during getting list of brokers from database")
 
-    response_code, all_clients = client_database.list_all_clients()
+    response_code, all_client_heartbeats = client_database.list_all_client_heartbeats()
     if response_code != 200:
         raise Exception("Error during getting list of clients from database")
 
     try:
         print("########all brokers\n", all_brokers)
-        for client_url in all_clients:
+        for client_url in all_client_heartbeats.keys():
             r = requests.post(
                 f"{client_url}/update-brokers",
                 data=json.dumps({"brokers": all_brokers}),
@@ -86,7 +86,7 @@ def prepare_updating(all_brokers, down_broker_id, down_broker_url):
 def update_replica_partition_of_a_broker_which_is_in_down_broker(broker_url):
     print(f"###############sedning request to {broker_url} to aware its replica")
     r = requests.post(f"{broker_url}/replica/down", timeout=2)
-    print(r.status_code)
+    print("%%aware status code", r.status_code)
     if r.status_code != 200:
         raise Exception("Error in sending request to broker to tell it its replica is down")
 
